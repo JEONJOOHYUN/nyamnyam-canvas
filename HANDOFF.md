@@ -2,20 +2,21 @@
 
 ## 마지막 업데이트: 2026-10-14
 
-## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1` (2단계 무게 엔진)
+## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1` (3단계 아이 화면 MVP)
 
 ## 현재 상태 요약
 
 - 1단계(세팅) 완료: Next.js 16.4 + TS strict + Tailwind v4 + shadcn/ui(base-nova) + ESLint/Prettier + Vitest + Playwright.
-- 2단계(무게 엔진) 완료: `WeightSource` 타입, 펌웨어와 같은 필터, `SimulatorSource`, 식사 상태 머신(순수 함수) + Vitest 22개.
-- 화면은 아직 홈 자리표시뿐. 엔진은 UI에 연결 안 됨.
-- 다음은 3단계 아이 화면 MVP.
+- 2단계(무게 엔진) 완료: `WeightSource` 타입, 펌웨어와 같은 필터, `SimulatorSource`, 식사 상태 머신(순수 함수).
+- 3단계(아이 화면 MVP) 완료: `/play` — 숲 맵 7단계, 냠냠이, 브라우저 TTS 음성, Web Audio 효과음, 개발 모드 시뮬레이터 패널. Vitest 31개.
+- 다음은 4단계 반응형 완성(Playwright 스크린샷). 클로바더빙 음성 제작(13장)은 사용자 확인 후 진행.
 
 ## 완료된 것
 
 - 1단계 세팅 (2026-10-14), `main` 첫 커밋 + `dev` 브랜치 생성
 - 문서 뼈대: README, `docs/SPEC.md`(원본 요구사항), `docs/FIRMWARE_NOTES.md`, `docs/ASSETS.md`, `CLAUDE.md`
 - 2단계 무게 엔진 (2026-10-14): `lib/weight/{types,constants,filter,simulator}.ts`, `lib/meal/machine.ts`, 테스트 3파일
+- 3단계 아이 화면 MVP (2026-10-14): `/play`, `components/{maps/forest,characters,play}`, `lib/audio/{sfx,voice}.ts`, `content/lines.ts`, `lib/meal/stage.ts`, `lib/weight/index.ts`. 실제 Chrome에서 한 끼 전체(빈 식판 → 담기 → 7단계 완성·무지개·도장, 들기·터치·배불러요) 확인
 
 ## 진행 중인 것
 
@@ -23,8 +24,9 @@
 
 ## 다음 할 일 (우선순위 순)
 
-1. 3단계 아이 화면 MVP: 숲 맵 7단계, 냠냠이, 브라우저 TTS, Web Audio 효과음, 시뮬레이터 패널(개발 모드). 여기서 `NEXT_PUBLIC_WEIGHT_SOURCE` 로 소스를 고르는 팩토리(`lib/weight/index.ts`)와 단계 계산(진행률 → 10/25/40/55/70/85/95%), 무반응 감지도 만든다
-2. Vercel 연결(사용자 작업): GitHub 저장소 import, Production Branch = `main`
+1. 4단계 반응형 완성: 6개 기기 Playwright 스크린샷 테스트. 세로 화면에서 그림이 작게 보이는 문제(SVG `meet` 이라 4:3 장면이 좁은 영역에 맞춰짐) 개선
+2. 클로바더빙 음성 제작(13장): 대사(`content/lines.ts`) 확정 → `docs/VOICE_SCRIPT.md` 생성 → 사용자에게 자동화 약관 허용 여부 확인 후 Chrome 작업. 대사 수: 냠냠이 21줄
+3. Vercel 연결(사용자 작업): GitHub 저장소 import, Production Branch = `main`
 
 ## 실행 방법
 
@@ -50,15 +52,21 @@ npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 ## 주요 설계 결정과 이유
 
 - **기기 연결은 Supabase 경유**: Vercel(HTTPS) 페이지에서 집 안 ESP32(`http://192.168.x.x`)로 직접 접속하면 혼합 콘텐츠로 차단된다. ESP32 → Edge Function → `device_state` → Realtime → 웹.
-- **애니메이션은 Motion + 코드 SVG**: 무게에 실시간으로 반응해야 해서 코드로 제어해야 한다. Lottie/Rive는 디자인 툴 파일이 필요해 보류. 캐릭터는 컴포넌트 단위로 분리해 나중에 교체 가능하게. (3단계에서 `motion` 설치 예정)
+- **애니메이션은 Motion + 코드 SVG**: 무게에 실시간으로 반응해야 해서 코드로 제어해야 한다. Lottie/Rive는 디자인 툴 파일이 필요해 보류. 캐릭터는 컴포넌트 단위로 분리해 나중에 교체 가능하게. `motion` 14.2 (`motion/react`). `<MotionConfig reducedMotion="user">` 로 `prefers-reduced-motion` 존중.
 - **글꼴**: 아이 화면 Jua(`font-kid`), 부모 화면 Noto Sans KR(`font-sans`). `next/font/google` 로 자체 호스팅.
 - **Next.js 16.4 기본값 유지**: `cacheComponents: true`, `partialPrefetching: true`, Tailwind는 PostCSS 대신 `@tailwindcss/turbopack` 로더. 코드 쓰기 전에 `node_modules/next/dist/docs/` 확인.
 - **`@types/node` 24**: vitest 5가 `@types/node` 22 이상을 요구해서 20에서 올림(로컬 Node 24.19).
 - 개발 서버 포트 3005 (다른 프로젝트가 3000~3004 사용).
-- **영점은 빈 저울(식판 없음) 기준** (2026-10-14): 스펙의 "식판 들어올리기 = 0g" 과 상태 이름 `EMPTY_TRAY` 에 맞춘 해석. 그래서 무게에 식판이 포함되고, 상태 머신이 먼저 빈 식판 무게(`trayG`)를 3초 유지로 잡은 뒤 음식이 20g 이상 더 올라와 3초 유지되면 `SERVED`(음식 = 시작 무게 − 식판). 사용자 확인 필요.
+- **영점은 빈 저울(식판 없음) 기준** (2026-10-14): 스펙의 "식판 들어올리기 = 0g" 과 상태 이름 `EMPTY_TRAY` 에 맞춘 해석. 그래서 무게에 식판이 포함되고, 상태 머신이 먼저 빈 식판 무게(`trayG`)를 3초 유지로 잡은 뒤 음식이 20g 이상 더 올라와 3초 유지되면 `SERVED`(음식 = 시작 무게 − 식판). 2026-10-14 사용자 확인 완료.
 - **진행 계산 방식**: `lowG`(지금까지의 최저 안정 무게) 아래로 3g 이상 내려간 만큼만 `eatenG` 에 더한다. 그래서 순간 튐·손 올림 같은 증가는 자연히 무시되고, 진행률은 `max` 로 유지돼 줄지 않는다. 남은 음식이 3g 이하면 자동 `ENDED`.
 - **추가 배식**: `lowG` 보다 30g 이상 늘어 3초 유지되면 처리. `count` = 음식 무게에 더함, `ignore` = 아무것도 안 바꿈(추가분을 먹어도 이전 최저 아래로 내려가기 전엔 진행 없음).
 - **비정상 감지**: 무게가 흔들리기 시작한 시각부터 다시 안정될 때까지에서 필터 안정화 1초를 뺀 시간이 2초 이하이고, 그동안 음식 무게의 50% 이상이 줄면 `heldG` 로 보류하고 진행에 넣지 않는다. 지금은 보류분을 나중에 인정하는 기능은 없다.
+- **숲 그림 구조**: `components/maps/forest/Stage1~4`(씨앗→새싹→작은 나무→큰 나무)는 서로 교체, `Stage5~7`(꽃, 열매, 새+무지개)은 위에 쌓는다. viewBox 800×600, 나무 뿌리 (400,458). 배경은 `overflow=visible` 로 viewBox 밖까지 그려 어떤 비율에서도 빈 곳이 없다(장면 `section` 이 `overflow-hidden`). 팔레트는 `forest/palette.ts` 7색.
+- **음성**: `speak()` 가 `public/voices/<character>/<lineId>.mp3` 를 먼저 재생하고, 없으면(재생 실패) 브라우저 TTS. 입 모양은 `MotionValue` (mp3 = AnalyserNode 음량, TTS = 말하는 동안 사인파)로 리렌더 없이 움직인다. 새 대사는 이전 대사를 끊는다.
+- **효과음**: `lib/audio/sfx.ts` 에서 사인/삼각파 + 짧은 엔벨로프로 합성. 첫 "시작하기" 탭에서 `AudioContext` 와 TTS 를 깨운다(iOS).
+- **아이 화면 레이아웃**: 가로(`landscape:`, 너비 무관)는 그림 7 : 패널 3, 세로는 위 그림 / 아래 패널. 스펙은 "가로 ≥768px" 이지만 휴대폰 가로(667px)도 세로 배치로 떨어지면 그림이 찌그러져서 방향만으로 나눴다.
+- **축하·도장**: 7단계 도달 시 컨페티 3.8초 + 캐릭터 춤 + 팡파레. 식사가 70% 이상으로 끝나면(자동 완료는 축하 뒤 4초, 배불러요는 바로) "참 잘했어요" 도장. 도장 저장·주간 도장판·앨범은 6단계(DB)에서.
+- **무반응 말 걸기**: 먹은 양이 30초 변화 없으면 기다림 대사, 한 끼에 최대 3번(`lib/meal/stage.ts` 기본값). 식판이 들려 있으면 세지 않는다.
 - **시뮬레이터는 실제 기기와 같은 파이프라인**: 10Hz 샘플 → `filterStep` → `shouldTransmit`. 식판 350g, 꾹 누르기 +120g 0.6초, 노이즈 ±2g. 그래서 필터·상태 머신을 부품 없이 시험할 수 있다.
 
 ## 알려진 문제와 주의점
@@ -68,6 +76,12 @@ npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 - 상태 머신 한계(UX로 안내 필요): 음식을 담은 식판을 처음부터 올리면 그 무게를 빈 식판으로 잡아 `SERVED` 가 안 된다 → 3단계 화면에서 "빈 식판을 올려 주세요 → 음식을 담아 주세요" 순서 안내 + 다시 시작 버튼. 음식을 나눠 담다가 3초 멈추면 그때 무게로 시작되고 나머지는 추가 배식으로 처리된다.
 - 비정상 감지는 양이 적을 때 민감하다(음식 40g에 한 입 20g이면 보류). 부모 설정에서 끌 수 있다.
 - `WeightSource` 인터페이스에 상태 변경 알림이 없다(스펙 그대로 `status` 속성만). 7단계 `SupabaseRealtimeSource` 에서 offline 표시가 필요할 때 추가 검토.
+- 시뮬레이터 패널은 `NODE_ENV !== "production"` 에서만 보인다. 그래서 Vercel 배포본에서는 무게를 넣을 방법이 없다 → 8단계 "시연 모드" 에서 해결.
+- 그림 완성 방식은 지금 (A) 먹은 양 기준만. (B) 식사 횟수 · (C) 누적 양은 6단계.
+- 설정값(퍼센트 표시, 배불러요 버튼, 도장 기준 70%)은 `PlayScreen.tsx` 의 `SETTINGS` 상수 — 6단계에서 DB 설정으로 교체.
+- mp3 가 없는 대사는 재생 시도 때 콘솔에 404 가 찍힌다(TTS 로 넘어감). 음성 파일이 생기면 사라진다.
+- 시뮬레이터로 시험할 때: 음식을 올린 뒤 약 5초(필터 안정 ~2초 + 3초 유지)는 그대로 둬야 `SERVED` 가 된다. 그 전에 값을 바꾸면 유지 타이머가 다시 시작된다.
+- Claude in Chrome 탭이 뒤에 있으면(`document.visibilityState === "hidden"`) motion 애니메이션이 멈춰 말풍선(`AnimatePresence mode="wait"`)이 이전 대사에 머문다. 스크린샷을 찍으면 따라잡는다 — 앱 버그 아님.
 - Playwright 브라우저는 chromium만 설치. 기기 6종 모두 chromium 뷰포트로 흉내 낸다(실제 Safari 아님).
 
 ## 펌웨어 연동 상태
@@ -76,23 +90,33 @@ npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 
 ## 파일 구조 지도
 
-| 경로                      | 설명                                                                                  |
-| ------------------------- | ------------------------------------------------------------------------------------- |
-| `app/`                    | Next.js 라우트. 지금은 `layout.tsx`(글꼴), `page.tsx`(자리표시)                       |
-| `components/ui/`          | shadcn 컴포넌트 (부모 화면용)                                                         |
-| `lib/utils.ts`            | shadcn `cn`                                                                           |
-| `lib/weight/types.ts`     | `WeightReading`·`DeviceCommand`·`WeightSource` (펌웨어 JSON 계약)                     |
-| `lib/weight/constants.ts` | 펌웨어와 공유하는 필터·전송 상수                                                      |
-| `lib/weight/filter.ts`    | 중앙값→이동평균→안정 판단, 전송 조건 (펌웨어 파이프라인 복제)                         |
-| `lib/weight/simulator.ts` | `SimulatorSource`: `setFood`·`bite`·`press`·`lifted`·`noise`, tare 명령               |
-| `lib/meal/machine.ts`     | 식사 상태 머신 `mealReducer` + 기준 상수                                              |
-| `e2e/`                    | Playwright 테스트 (기기 6종은 `playwright.config.ts`)                                 |
-| `docs/SPEC.md`            | 원본 요구사항 전체                                                                    |
-| `docs/FIRMWARE_NOTES.md`  | 하드웨어·데이터 계약·펌웨어 참고                                                      |
-| `docs/ASSETS.md`          | 출처 표기                                                                             |
-| 예정                      | `content/lines.ts`, `components/maps/`, `supabase/`, `firmware/nyamnyam/`, `scripts/` |
+| 경로                                                        | 설명                                                                       |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `app/`                                                      | `layout.tsx`(글꼴), `page.tsx`(홈 → 식사 시작), `play/page.tsx`(아이 화면) |
+| `components/play/PlayScreen.tsx`                            | 아이 화면 본체: 소스 연결, 상태 머신, 대사·효과음·축하 연결                |
+| `components/play/{Progress,Celebration,SimulatorPanel}.tsx` | 진행 점·막대 / 컨페티·도장 / 개발용 시뮬레이터                             |
+| `components/maps/Appear.tsx`                                | 등장 스프링, 살랑임(`Sway`), 반짝이(`Sparkles`)                            |
+| `components/maps/forest/`                                   | 숲 맵: `Background`, `Stage1~7`, `ForestMap`(단계 → 레이어)                |
+| `components/characters/Nyamnyam.tsx`                        | 냠냠이 SVG (숨쉬기·깜빡임·입·점프·터치·춤)                                 |
+| `content/lines.ts`                                          | 캐릭터 대사 전체 (부모 검토용) + 금지어 테스트                             |
+| `lib/audio/sfx.ts`, `voice.ts`                              | 합성 효과음 / mp3·TTS 음성 + 입 동기화                                     |
+| `lib/meal/stage.ts`                                         | 진행률 → 단계, 무반응 판단                                                 |
+| `lib/weight/index.ts`                                       | `createWeightSource()` — 소스 선택 유일한 위치                             |
+| `components/ui/`                                            | shadcn 컴포넌트 (부모 화면용)                                              |
+| `lib/utils.ts`                                              | shadcn `cn`                                                                |
+| `lib/weight/types.ts`                                       | `WeightReading`·`DeviceCommand`·`WeightSource` (펌웨어 JSON 계약)          |
+| `lib/weight/constants.ts`                                   | 펌웨어와 공유하는 필터·전송 상수                                           |
+| `lib/weight/filter.ts`                                      | 중앙값→이동평균→안정 판단, 전송 조건 (펌웨어 파이프라인 복제)              |
+| `lib/weight/simulator.ts`                                   | `SimulatorSource`: `setFood`·`bite`·`press`·`lifted`·`noise`, tare 명령    |
+| `lib/meal/machine.ts`                                       | 식사 상태 머신 `mealReducer` + 기준 상수                                   |
+| `e2e/`                                                      | Playwright 테스트 (기기 6종은 `playwright.config.ts`)                      |
+| `docs/SPEC.md`                                              | 원본 요구사항 전체                                                         |
+| `docs/FIRMWARE_NOTES.md`                                    | 하드웨어·데이터 계약·펌웨어 참고                                           |
+| `docs/ASSETS.md`                                            | 출처 표기                                                                  |
+| 예정                                                        | `supabase/`, `firmware/nyamnyam/`, `scripts/`                              |
 
 ## 세션 기록
 
 - 2026-10-14: 1단계 세팅. Codex 리뷰 지적 반영(`typecheck` 에 `next typegen` 추가 — `LayoutProps` 가 `.next` 에서 생성돼 새 clone 에서 실패했음). `main`·`dev` push 완료.
 - 2026-10-14: 2단계 무게 엔진. 영점 기준(빈 저울)·진행 계산·추가 배식·비정상 감지 방식 결정(위 "주요 설계 결정"). Codex 리뷰 2건 반영: 불안정 값이 오면 3초 유지 타이머 초기화, 비정상 감지 시간을 필터·전송 지연과 무관하게 측정.
+- 2026-10-14: 3단계 아이 화면 MVP. `motion` 설치. Chrome(가로)·Playwright(375/360 세로, 1024 가로)로 화면 확인. Next 개발 표시(`devIndicators`)는 시뮬레이터 패널을 가려서 끔. Codex 리뷰 2건 반영: `speak()` 가 정상 종료(true)/취소(false)를 구분해 취소된 대사가 TTS 로 다시 재생되거나 입 애니메이션이 남지 않게 함, 7단계 응원이 끊기면 완료 대사를 이어 붙이지 않음.

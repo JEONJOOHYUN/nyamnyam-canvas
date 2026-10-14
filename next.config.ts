@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The indicator sits on top of the dev simulator panel.
+  devIndicators: false,
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

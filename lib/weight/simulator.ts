@@ -66,6 +66,14 @@ export class SimulatorSource implements WeightSource {
     this.setFood(this.foodG - g);
   }
 
+  setLifted(v: boolean) {
+    this.lifted = v;
+  }
+
+  setNoise(v: boolean) {
+    this.noise = v;
+  }
+
   press(ms = 600) {
     this.pressUntil = Date.now() + ms;
   }
