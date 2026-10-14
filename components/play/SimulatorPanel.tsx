@@ -28,7 +28,7 @@ export function SimulatorPanel({
   };
 
   return (
-    <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 z-50 font-sans">
+    <div className="fixed top-[calc(max(0.75rem,env(safe-area-inset-top))+2.25rem)] left-3 z-50 font-sans">
       <button type="button" className={btn} onClick={() => setOpen(!open)}>
         {open ? "시뮬레이터 닫기" : "🧪 시뮬레이터"}
       </button>

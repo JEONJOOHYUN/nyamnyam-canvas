@@ -194,7 +194,7 @@ export function PlayScreen() {
           </span>
         </section>
 
-        <aside className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-t-[2rem] bg-[#FFF8E8] px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-6px_20px_rgba(0,0,0,0.08)] landscape:grid-cols-1 landscape:content-center landscape:justify-items-center landscape:rounded-l-[2rem] landscape:rounded-tr-none landscape:pr-[max(1rem,env(safe-area-inset-right))] landscape:shadow-[-6px_0_20px_rgba(0,0,0,0.08)]">
+        <aside className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-t-[2rem] bg-[#FFF8E8] px-[max(1rem,calc(50%-20rem))] pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-6px_20px_rgba(0,0,0,0.08)] landscape:grid-cols-1 landscape:content-center landscape:justify-items-center landscape:rounded-l-[2rem] landscape:rounded-tr-none landscape:pl-4 landscape:pr-[max(1rem,env(safe-area-inset-right))] landscape:shadow-[-6px_0_20px_rgba(0,0,0,0.08)]">
           <Nyamnyam
             mouth={mouth}
             jump={stage}
@@ -213,7 +213,7 @@ export function PlayScreen() {
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="relative rounded-3xl bg-white px-4 py-3 text-center text-[clamp(1.15rem,3.6vmin,1.75rem)] leading-snug shadow-sm"
+                  className="relative rounded-3xl bg-white px-4 py-3 text-center text-[clamp(1.15rem,3.6vmin,1.75rem)] leading-snug break-keep text-balance shadow-sm"
                 >
                   {bubble}
                 </motion.p>

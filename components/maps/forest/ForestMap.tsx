@@ -24,13 +24,18 @@ const SPARKLE_AT: ([number, number] | null)[] = [
   [400, 160],
 ];
 
+// The part that must always be visible (tree, flowers, birds, rainbow top). Fitting this box
+// instead of the full 800x600 scene keeps the picture large on narrow portrait phones;
+// the background is drawn far past it so wider areas never show an edge.
+const FOCUS = "170 85 460 465";
+
 export function ForestMap({ stage }: { stage: number }) {
   const plant = Math.min(stage, 4);
   const Plant = PLANTS[plant];
   const sparkle = SPARKLE_AT[stage];
   return (
     <svg
-      viewBox="0 0 800 600"
+      viewBox={FOCUS}
       preserveAspectRatio="xMidYMid meet"
       overflow="visible"
       className="size-full"
