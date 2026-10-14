@@ -2,7 +2,7 @@
 
 ## 마지막 업데이트: 2026-10-14
 
-## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1` 참고
+## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `5816aea` chore: Next.js 16 프로젝트 세팅과 문서 뼈대 추가
 
 ## 현재 상태 요약
 
@@ -80,4 +80,4 @@ npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 
 ## 세션 기록
 
-- 2026-10-14: 1단계 세팅.
+- 2026-10-14: 1단계 세팅. Codex 리뷰 지적 반영(`typecheck` 에 `next typegen` 추가 — `LayoutProps` 가 `.next` 에서 생성돼 새 clone 에서 실패했음). `main`·`dev` push 완료.
