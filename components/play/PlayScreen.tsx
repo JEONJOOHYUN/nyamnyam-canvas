@@ -37,7 +37,10 @@ import { SimulatorPanel } from "./SimulatorPanel";
 // shortcut: parent settings arrive in stage 6; until then these are the spec defaults.
 const SETTINGS = { showPercent: true, fullButton: true, stampAt: 0.7 };
 const CHARACTER: CharacterId = "nyamnyam";
-const SHOW_SIMULATOR = process.env.NODE_ENV !== "production";
+// Vercel Preview deploys (dev branch) keep the simulator so the screen can be tried on a tablet.
+const SHOW_SIMULATOR =
+  process.env.NODE_ENV !== "production" ||
+  process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
 
 // The scene finishes at the last stage threshold, when the completion cheer plays.
 const SCENE_DONE_AT = DEFAULT_STAGE_THRESHOLDS[STAGE_COUNT - 1] / 100;

@@ -15,7 +15,11 @@ export default function GardenDesignPage({
 }: {
   searchParams: SearchParams;
 }) {
-  if (process.env.NODE_ENV === "production") notFound();
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.NEXT_PUBLIC_VERCEL_ENV !== "preview"
+  )
+    notFound();
   return (
     <Suspense fallback={<div className="h-dvh bg-[#91dfff]" />}>
       <DesignGallery searchParams={searchParams} />
