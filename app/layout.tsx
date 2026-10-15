@@ -1,11 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Jua, Noto_Sans_KR } from "next/font/google";
+import { Jua } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-// Body text (parent pages). Korean glyphs load via unicode-range slices.
-const notoSansKr = Noto_Sans_KR({
-  variable: "--font-noto-sans-kr",
-  subsets: ["latin"],
+// Body text (parent pages, simulator). NAVER D2Coding 1.4.0, the official unmodified
+// web files: OFL Reserved Font Name forbids shipping a subset under this name.
+// ~1.5MB per weight, so no preload: the child screen mostly uses Jua.
+const d2coding = localFont({
+  src: [
+    { path: "./fonts/D2Coding-Regular.woff2", weight: "400" },
+    { path: "./fonts/D2Coding-Bold.woff2", weight: "700" },
+  ],
+  variable: "--font-d2coding",
+  preload: false,
+  fallback: ["ui-monospace", "monospace"],
 });
 
 // Rounded display font for the child screen.
@@ -28,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ko"
-      className={`${notoSansKr.variable} ${jua.variable} h-full antialiased`}
+      className={`${d2coding.variable} ${jua.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col">{children}</body>
     </html>

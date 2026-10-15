@@ -14,6 +14,8 @@
 
 ## 완료된 것
 
+- Vercel 연결 (2026-10-15, Claude 가 사용자 크롬에서 import): 프로젝트 `joohyun/nyamnyam-canvas`(Hobby), Production = `main`, `dev` push 마다 Preview. 브랜치 고정 주소 https://nyamnyam-canvas-git-dev-joohyun.vercel.app (Vercel 로그인 필요 — 배포 보호 기본값). 환경변수 없음(무게 소스 기본값 simulator). Preview(`NEXT_PUBLIC_VERCEL_ENV=preview`)에서만 시뮬레이터 패널과 `/design/garden` 을 켬, Production 은 숨김.
+- 본문 글꼴 D2Coding 1.4.0 (2026-10-15 사용자 요청, "본문만" 선택): 부모 화면·시뮬레이터·작은 글씨는 D2Coding, 아이 말풍선·버튼·제목은 Jua 유지. NAVER 공식 웹폰트(`site/fonts`, 태그 VER1.4.0)를 수정 없이 `app/fonts/` 에(굵기당 약 1.5MB, `preload: false`). OFL 예약 글꼴 이름 때문에 서브셋(약 300KB)을 만들 수 없어서 원본 사용. Noto Sans KR 제거.
 - 정원 장면 `/play` 연결 (2026-10-15, 사용자 "우편함 대칭만 고치고 바로 가자"): 우편함 기둥·봉투를 통 가운데(x=81)로. `PlayScreen` 이 숲 맵·`Nyamnyam`·`Progress` 대신 `GardenScene` 전체 화면(세로=`tall`, 가로=`wide`, `matchMedia` + `useSyncExternalStore`). 몸짓: 축하 중 `celebrate` / 들기·끝남 `wait` / 새 부품 뒤 2.4초 `point` / 그 외 `hello`. 장면 진행률 = 먹은 비율 ÷ 마지막 단계 기준(95%) → 7단계 완성 응원과 장면 완성이 같은 순간. % 칩(`role=progressbar`, `showPercent` 끄면 sr-only)과 배불러요·새 그림 시작 버튼은 오른쪽 위(아래쪽은 부품이 자라는 자리라 가리지 않게). 냠냠이 탭 = `GardenScene` `onChickTap`(SVG `role=button`, 그래서 장면 svg 는 `role=group`), 말하는 부리 = `mouth` MotionValue 를 `Chick` 의 `mouth` 슬롯에 `motion.path` 로(Chick 은 서버 컴포넌트 시안 페이지에서도 쓰므로 motion 을 직접 import 하지 않음). 단계 대사를 우체국 장면에 맞게 교체(`content/lines.ts`). `Progress.tsx` 삭제. 숲 맵(`components/maps/`)·`characters/Nyamnyam` 은 테마 확장용으로 남겨 둠(현재 미사용). Codex 리뷰 3건(완성 시점 95%/100% 어긋남, 부리 동기화, 포커스 표시) 모두 반영. lint·typecheck·test 42·e2e 12 통과, 기준 스크린샷 6장 다시 만듦.
 - 1단계 세팅 (2026-10-14), `main` 첫 커밋 + `dev` 브랜치 생성
 - 문서 뼈대: README, `docs/SPEC.md`(원본 요구사항), `docs/FIRMWARE_NOTES.md`, `docs/ASSETS.md`, `CLAUDE.md`
@@ -45,9 +47,8 @@
 
 ## 다음 할 일 (우선순위 순)
 
-1. 5단계 테마 확장: 포동이(곰)·반짝이(별) 캐릭터와 대사, 바다·우주 맵 7단계, 테마 선택 화면
+1. 5단계 테마 확장 (2026-10-15 사용자 결정: 숲 대신 아이들이 좋아할 세계 3개 — **바람 우체국**(현재), **바다 왕국**(바닷속 궁전), **우주 외계인 마을**(행성 위 기지). 셋 다 "먹는 만큼 하나씩 지어지는" 같은 구조, 우체국처럼 부품 30~40개): 테마 구조·선택 화면·대사는 Claude, 장면·포동이(곰)·반짝이(별) 그림은 Codex(우체국 v7 수준), 비교 페이지로 확인
 2. 클로바더빙 음성 제작(13장): 대사(`content/lines.ts`) 확정 → `docs/VOICE_SCRIPT.md` 생성 → 사용자에게 자동화 약관 허용 여부 확인 후 Chrome 작업. 대사 수: 냠냠이 21줄
-3. Vercel 연결(사용자 작업): GitHub 저장소 import, Production Branch = `main`
 
 ## 실행 방법
 
