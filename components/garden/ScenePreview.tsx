@@ -4,14 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GardenScene, type GardenSceneProps } from "./GardenScene";
-import { Chick, CHICK_POSES, POSE_LABELS } from "./Chick";
+import { CHICK_POSES, POSE_LABELS } from "./Chick";
 import { buildProgress } from "./growth";
+import { CHARACTERS } from "./characters";
 import { THEMES } from "./themes";
 
 export function BuildPreview({
   layout,
   theme = "post",
-}: Pick<GardenSceneProps, "layout" | "theme">) {
+  character = "nyamnyam",
+}: Pick<GardenSceneProps, "layout" | "theme" | "character">) {
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const elapsed = useRef(0);
@@ -31,6 +33,7 @@ export function BuildPreview({
   return (
     <>
       <GardenScene
+        character={character}
         theme={theme}
         progress={progress}
         layout={layout}
@@ -51,8 +54,9 @@ export function BuildPreview({
 // Cycles through every pose so the blend between poses can be watched.
 export function PoseLoop({
   theme = "post",
+  character = "nyamnyam",
   layout = "wide",
-}: Partial<Pick<GardenSceneProps, "theme" | "layout">>) {
+}: Partial<Pick<GardenSceneProps, "theme" | "layout" | "character">>) {
   const [index, setIndex] = useState(0);
   useEffect(() => {
     const timer = window.setInterval(
@@ -62,6 +66,7 @@ export function PoseLoop({
     return () => window.clearInterval(timer);
   }, []);
   const pose = CHICK_POSES[index];
+  const { Component: Character, name } = CHARACTERS[character];
   if (theme !== "post")
     return (
       <figure className="mx-auto max-w-3xl overflow-hidden rounded-3xl bg-[#d4fff2]">
@@ -73,6 +78,7 @@ export function PoseLoop({
           }
         >
           <GardenScene
+            character={character}
             theme={theme}
             progress={1}
             layout={layout}
@@ -93,10 +99,14 @@ export function PoseLoop({
       <svg
         viewBox="-130 -240 260 270"
         role="img"
-        aria-label={POSE_LABELS[pose]}
+        aria-label={
+          character === "nyamnyam"
+            ? POSE_LABELS[pose]
+            : `${name}. ${POSE_LABELS[pose]}`
+        }
         className="w-full"
       >
-        <Chick pose={pose} />
+        <Character pose={pose} />
       </svg>
       <figcaption className="text-center font-kid text-xl" aria-live="polite">
         {POSE_LABELS[pose]}

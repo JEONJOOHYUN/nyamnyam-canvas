@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { motion, type MotionValue } from "motion/react";
 import "./garden.css";
 import { THEMES, type GardenThemeKey } from "./themes";
-import { Chick, POSE_LABELS, type ChickPose } from "./Chick";
+import { POSE_LABELS, type ChickPose } from "./Chick";
+import { CHARACTERS, type GardenCharacterKey } from "./characters";
 import { visiblePieces } from "./growth";
 
 export { CHICK_POSES } from "./Chick";
@@ -12,6 +13,7 @@ export type { ChickPose } from "./Chick";
 
 export interface GardenSceneProps {
   theme?: GardenThemeKey;
+  character?: GardenCharacterKey;
   progress: number;
   layout: "wide" | "tall";
   bubble: string | null;
@@ -23,6 +25,7 @@ export interface GardenSceneProps {
 
 export function GardenScene({
   theme = "post",
+  character = "nyamnyam",
   progress,
   layout,
   bubble,
@@ -33,6 +36,7 @@ export function GardenScene({
   const tall = layout === "tall";
   const titleId = useId();
   const selected = THEMES[theme];
+  const { Component: Character, name } = CHARACTERS[character];
   const { Background, Scenery } = selected;
   const visible = visiblePieces(progress, selected.events);
   const latest = visible.at(-1);
@@ -77,7 +81,7 @@ export function GardenScene({
       >
         <title
           id={titleId}
-        >{`냠냠이와 ${selected.title}. ${POSE_LABELS[pose]} ${selected.description}`}</title>
+        >{`${name}와 ${selected.title}. ${POSE_LABELS[pose]} ${selected.description}`}</title>
         <Scenery tall={tall} />
         <g strokeLinejoin="round" strokeLinecap="round">
           {visible
@@ -121,7 +125,7 @@ export function GardenScene({
             {...(onChickTap && {
               role: "button",
               tabIndex: 0,
-              "aria-label": "냠냠이",
+              "aria-label": name,
               className: "cursor-pointer",
               onClick: onChickTap,
               onKeyDown: (event: KeyboardEvent) => {
@@ -129,7 +133,7 @@ export function GardenScene({
               },
             })}
           >
-            <Chick
+            <Character
               pose={pose}
               mouth={
                 mouth && (
