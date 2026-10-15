@@ -1,6 +1,6 @@
 # HANDOFF — 냠냠캔버스 (nyamnyam-canvas)
 
-## 마지막 업데이트: 2026-10-14
+## 마지막 업데이트: 2026-10-15
 
 ## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1` (4단계 반응형 완성)
 
@@ -10,10 +10,11 @@
 - 2단계(무게 엔진) 완료: `WeightSource` 타입, 펌웨어와 같은 필터, `SimulatorSource`, 식사 상태 머신(순수 함수).
 - 3단계(아이 화면 MVP) 완료: `/play` — 숲 맵 7단계, 냠냠이, 브라우저 TTS 음성, Web Audio 효과음, 개발 모드 시뮬레이터 패널. Vitest 31개.
 - 4단계(반응형 완성) 완료: 6개 기기 Playwright 레이아웃·스크린샷 테스트, 세로 화면 그림 확대.
-- 다음은 5단계 테마 확장(캐릭터 3종·맵 3종·테마 선택). 클로바더빙 음성 제작(13장)은 사용자 약관 확인 후 진행.
+- 정원 재설계 완료(2026-10-15): `/play` 가 바람 우체국 장면(`components/garden/GardenScene`)으로 바뀜. 다음: 5단계 테마 확장, 클로바더빙(사용자 약관 확인 후).
 
 ## 완료된 것
 
+- 정원 장면 `/play` 연결 (2026-10-15, 사용자 "우편함 대칭만 고치고 바로 가자"): 우편함 기둥·봉투를 통 가운데(x=81)로. `PlayScreen` 이 숲 맵·`Nyamnyam`·`Progress` 대신 `GardenScene` 전체 화면(세로=`tall`, 가로=`wide`, `matchMedia` + `useSyncExternalStore`). 몸짓: 축하 중 `celebrate` / 들기·끝남 `wait` / 새 부품 뒤 2.4초 `point` / 그 외 `hello`. 장면 진행률 = 먹은 비율 ÷ 마지막 단계 기준(95%) → 7단계 완성 응원과 장면 완성이 같은 순간. % 칩(`role=progressbar`, `showPercent` 끄면 sr-only)과 배불러요·새 그림 시작 버튼은 오른쪽 위(아래쪽은 부품이 자라는 자리라 가리지 않게). 냠냠이 탭 = `GardenScene` `onChickTap`(SVG `role=button`, 그래서 장면 svg 는 `role=group`), 말하는 부리 = `mouth` MotionValue 를 `Chick` 의 `mouth` 슬롯에 `motion.path` 로(Chick 은 서버 컴포넌트 시안 페이지에서도 쓰므로 motion 을 직접 import 하지 않음). 단계 대사를 우체국 장면에 맞게 교체(`content/lines.ts`). `Progress.tsx` 삭제. 숲 맵(`components/maps/`)·`characters/Nyamnyam` 은 테마 확장용으로 남겨 둠(현재 미사용). Codex 리뷰 3건(완성 시점 95%/100% 어긋남, 부리 동기화, 포커스 표시) 모두 반영. lint·typecheck·test 42·e2e 12 통과, 기준 스크린샷 6장 다시 만듦.
 - 1단계 세팅 (2026-10-14), `main` 첫 커밋 + `dev` 브랜치 생성
 - 문서 뼈대: README, `docs/SPEC.md`(원본 요구사항), `docs/FIRMWARE_NOTES.md`, `docs/ASSETS.md`, `CLAUDE.md`
 - 2단계 무게 엔진 (2026-10-14): `lib/weight/{types,constants,filter,simulator}.ts`, `lib/meal/machine.ts`, 테스트 3파일
@@ -22,7 +23,25 @@
 
 ## 진행 중인 것
 
-- 없음
+- (완료, 위 "완료된 것" 참고) **식사 화면 정원 재설계** (2026-10-14 사용자 요청, 5단계보다 먼저): 오른쪽 베이지 패널 제거 → 정원 한 장면. 화단 가운데 사과나무가 진행률에 따라 연속으로 자람(잎·덩어리·꽃·사과가 몇 %마다 하나씩), 냠냠이는 화단 옆에 서서 반응, 진행 점·막대·%는 없앰, 시뮬레이터는 보호자 메뉴로.
+  - 시안 아티팩트(1차→2차→3차 비교, 성장 8컷, 몸짓 6가지): https://claude.ai/artifact/E5RGwdW2v89NA93m5Eog8Z (Version 3). 공유 상태는 "링크가 있는 누구나"(사용자 설정).
+  - 코드: `components/garden/` (`style.ts` 그림 규칙·색, `Backdrop`, `Plant`(p→부품), `Chick`(몸짓 6가지 + `Bubble`), `GardenScene`(wide/tall 배치, 카메라 고정)), 시안 페이지 `app/design/garden`(개발 모드 전용, `?layout=tall`). 아직 `/play` 에 연결 안 됨, **커밋 안 함**(작업 트리에 3차 코드 + `vitest.config.mts` 의 `components/**/*.test.ts` include 변경, 테스트 33개 통과).
+  - 2026-10-14 2차 다듬기(사용자 "A로 다듬어줘"): `style.ts` 에 `wobble`(손그림 타원)·`scallop`(잎 덩어리 가장자리)과 테스트(`style.test.ts`, vitest include 에 `components/**` 추가). 선 굵기 3단계 `LINE 5`(나무·병아리) / `MID 3.5`(화단·팻말·말풍선) / `THIN 2.5`(울타리·덤불), 구름·언덕은 선 없음. 배경 채도 낮춤, 울타리 말뚝 높이·기울기 변화, 줄기 휘어짐·뿌리(밑동 윤곽선 없음). 냠냠이 머리:몸 약 3:2, 표정 6가지 `idle/look/wow/yum/cheer/wait`(`CHICK_POSES`), 날개 각도는 머리에 가리지 않게 105° 이하. 시안 페이지에 표정 줄(`data-state="faces"`). 아티팩트 Version 2 에 1차·2차 비교 포함.
+  - 2026-10-14 3차(사용자 "Codex 의견 물어봐" → Codex "4~8세보다 영유아용 장면 같다, 표정만 있고 행동 없음, 보상이 예측 가능" → 사용자 "그렇게 진행해"): 냠냠이 머리:몸 약 1:1, **몸짓 6가지** `idle/peek/sniff/wave/cheer/wait`(`POSES` 표: lean·tilt·face(3/4 시점)·wings·sit), wave 날개는 머리 앞에 그림. 나무는 **팔(|dx|>=150) 잎 덩어리가 가지부터**: 가지가 왕관 밖으로 뻗고(`BRANCH_LEAD` .07) 끝에 잎 → 작은 덩어리 → 커짐, 가지는 왕관 위에 계속 보임(`Crown` 을 core/arm 두 번 그림). 꽃은 봉오리(`BUD_LEAD` .06) 후 열림. 카메라 고정(near/far 보간 제거), 말풍선 글자 25·선 연하게, 울타리 opacity .6. 시안 페이지에 성장 8컷(`data-state="growth"`). Codex 리뷰 2회 더(3차 평가 → 반영 → 확인 "두 가지 고치고 애니메이션으로 넘어가도 됨" → 반영). 아티팩트 Version 3.
+  - 2026-10-15 사용자 결정: **Codex 에게 백지에서 새 시안을 그리게 하고 3차와 비교**. 3차 코드·캡처·시안 페이지·Codex 평가 원문은 git 밖 `C:/dev/_backup/nyamnyam-garden-v3/` 에 백업(`code/`, `shots/`, `board/`, `codex-answer*.md`, 캡처 스크립트 `garden.mjs`). Codex 작업 지시서 `C:/dev/_backup/nyamnyam-garden-v3/CODEX_BRIEF.md`. Codex 캡처 출력은 `tmp-design/`(`.git/info/exclude`). **Codex 사용량 한도로 대기 중**(2026-10-15 오전 1:37 해제 안내). 실행 직전에 작업 트리의 `components/garden/`, `app/design/garden/` 를 비우고 `codex exec -s workspace-write` 로 지시서를 넘긴다.
+    - 이어서 할 순서: **사용자가 "진행해" / "내일 진행해" / "이어서 해" 라고 하면 묻지 말고 바로 실행** (사용자가 2026-10-15 미리 승인): `C:/dev/_backup/nyamnyam-garden-v3/run.sh` 를 순서대로 — ① `run.sh check` (dev server 가 200 이 아니면 `nyamnyam-canvas` 에서 `npm run dev` 를 백그라운드로) ② `run.sh probe` (exit 2 = Codex 한도 → 해제 시각을 알리고 멈춤) ③ `run.sh clear` ④ `run.sh codex` (10~30분, **백그라운드로**) ⑤ `run.sh verify` (실패·허용 범위 밖 변경·`any` 는 직접 고치지 말고 보고) ⑥ `run.sh shots` ⑦ 3차 캡처(`shots/`)와 Codex 캡처(`shots-v4/`)를 나란히 비교하는 페이지를 같은 아티팩트 URL 에 Version 4 로 게시하고 Codex 보고(`codex-v4-answer.md`) 요약과 함께 사용자에게 어느 쪽으로 갈지 묻기. 3차를 고르면 `run.sh restore`. 커밋은 하지 않는다. 프롬프트·스크립트는 모두 그 폴더에 있다(`probe.md`, `probe-*.mjs`, `CODEX_BRIEF.md`, `garden.mjs`). 2026-10-15 확인: 이 PC 에서 localhost:3005 fetch 200, Playwright Chromium 실행 OK, 백업과 작업 트리 일치. Codex 샌드박스 안에서도 되는지는 ② 에서 확인.
+  - 2026-10-15 실행: probe 결과 Codex 샌드박스에서 localhost:3005 fetch OK·view_image OK·**Chromium 실행 불가(spawn EPERM)** → 샌드박스 밖 캡처 서버 `capture-server.mjs`(:3007, `GET /shoot?tag=`)를 띄우고 Codex 는 `shoot.mjs <태그>` 로 캡처를 받아 직접 보며 반복(지시서에 반영). `run.sh clear` 후 `run.sh codex` 시작(Codex 결과·로그는 `codex-v4-answer.md`, `codex-v4-log.txt`, 캡처는 `tmp-design/<태그>/`). 캡처 서버는 세션이 끝나면 꺼짐.
+  - 2026-10-15 Codex 4안 완료: 주제 **‘바람 우체국’**(디딤돌 길→우체통→계단→우체국→지붕→망원경→편지 돛배, `growth.ts` `GROWTH_STAGES`), 냠냠이는 팔다리·스카프, 몸짓 5가지 `hello/point/wonder/celebrate/wait`. 파일 `components/garden/{Chick,GardenScene,growth,growth.test,ScenePreview}.tsx|ts`. lint·typecheck·test(36) 통과, 허용 범위 밖 변경·`any` 없음, 페이지 오류 0. 발견한 문제: 부품이 clipPath 로 **아래→위 잘린 채 드러남**(단계 중간엔 반쯤 잘린 모양), 아이 화면에 제목·로고 글자, 시작 화면 위쪽이 빔, 배불러요 버튼 대비 낮음. 작업 트리에는 지금 **4안**이 있고, 4안 사본 `code-v4/`, 캡처 `shots-v4/`. 비교 페이지를 아티팩트 Version 4 로 게시(원본 `C:/dev/_backup/nyamnyam-garden-v3/compare/`). **사용자 선택 대기**: 3차(`run.sh restore`) / 4안(고친 뒤 연결) / 섞기.
+  - 2026-10-15 사용자 결정: **4안을 Codex 가 고치기(v5)**. 지시서 `C:/dev/_backup/nyamnyam-garden-v3/CODEX_BRIEF_v5.md` — 4~6세 기준, 채도 높이기, clipPath 잘림 금지 → 온전한 조각이 하나씩 생기며 motion 으로 짓는 애니메이션(`data-state="build"` 자동 재생 섹션 추가), 냠냠이를 하츄핑 수준으로 귀엽게(닮게 그리지는 않음 — 큰 머리·반짝이는 큰 눈·볼터치, 스카프·막대 다리 제거), 아이 화면 제목·로고 글자 제거, 배불러요 대비. 결과 `codex-v5-answer.md`·`codex-v5-log.txt`, 캡처 `tmp-design/v5-*`. 4안 사본은 `code-v4/`.
+    - 2026-10-15 v5 완료: 온전한 조각 38개가 각각 0.55초 내려앉음, 맑은 하늘·선명한 풀색, 냠냠이 큰 머리·하이라이트 눈·볼터치·통통한 발(스카프·배 무늬·막대 다리 제거), 배불러요 진한 청록. lint·typecheck·test(37) 통과, 범위 밖 변경·`any` 없음. 사본 `code-v5/`, 캡처 `shots-v5/`. 작업 트리에는 **v5**. 짓는 애니메이션(`build` 섹션)은 브라우저에서 아직 눈으로 확인 안 함. **사용자 확인 대기**.
+    - 2026-10-15 사용자: "v5가 지금까지 가장 괜찮다, 그런데 허전하고 생기는 게 적다" → v6 지시서 `CODEX_BRIEF_v6.md`: v5 유지 + 사건 30~40개(간격 ≤4%, 테스트), 주변 풍경도 자람(꽃·나무·가랜드·바람개비·새·편지 등), 생긴 것 계속 움직임, 생길 때 반짝임·퐁 강조와 냠냠이 시선, 30~35%에 작고 완성된 우체국 먼저 → 덧붙여 커짐, growth 12컷. 결과 `codex-v6-answer.md`, 캡처 `tmp-design/v6-*`. v5 사본 `code-v5/`.
+    - 2026-10-15 v6 완료: 사건 34개(최대 간격 3%), 33%에 지붕까지 있는 우체국, 마을 소품, 계속 움직이는 요소 6개. lint·typecheck·test(40) 통과, 범위 밖 변경·`any` 없음. 사본 `code-v6/`·`shots-v6/`, 작업 트리에는 **v6**. 비교 페이지(v5 vs v6) 아티팩트 Version 5, 원본 `compare56/`. 눈에 띈 점: 새 소품이 연한 파스텔이라 바래 보임, 100% 등불이 작고 모호함, 돛배가 지붕 위에 얹힘, 0~27% 하늘 빔. **사용자 선택 대기**.
+    - 2026-10-15 사용자: "v6에 바람개비, 새 모양, 어색한 위치 다듬자" → v7 지시서 `CODEX_BRIEF_v7.md`: 종이 바람개비(4장 날개·외곽선, 냠냠이와 안 겹치게), 파랑새(냠냠이와 다른 색·실루엣), 가랜드·풍선·돛배·나무/울타리·망원경·꽃/연못 위치 정리, 100% 사건을 큰 '완성' 사건으로, 소품 채도·외곽선, 초반 하늘 채우기. 결과 `codex-v7-answer.md`, 캡처 `tmp-design/v7-*`. 끝나면 v6 vs v7 비교를 아티팩트 Version 6 으로.
+    - 2026-10-15 v7 완료(Codex): 종이 바람개비, 파랑새, 가랜드 처마·풍선 우체통·돛배 연못·망원경 땅, 100% = 우편 깃발+점등, 소품 채도·외곽선, 하늘 편지 9%. 사본 `code-v7/`·`shots-v7/`.
+    - 2026-10-15 Claude 직접 반영(아래 ①② 완료): `Chick.tsx` 날개를 한 모양(`WING`)+각도·길이로 통일, 모든 변형을 CSS `transform`(`.chick-move`, `transform-box: view-box; origin 0 0` = 로컬 원점) + `transition` 560ms 넘침 곡선으로 → 몸짓 사이가 이어짐. 반복 동작은 `garden.css` 키프레임(숨쉬기·깜빡임·흔들기·점프·쉬기 흔들림·반짝이), `data-ambient` 로 화면 밖 정지, reduced-motion 이면 끔. JS 애니메이션·`motion` 안 씀. 꽃 `Flowers` 꽃잎 5장+잎 2장, 꽃밭별 색(`edge`/`heart` prop), `.garden-bloom` 피어남. 시안 페이지에 `data-state="poses-live"`(`PoseLoop`, 2.4초마다 몸짓 순환). 테스트 2개 기대값을 새 마크업에 맞춤(시선 `transform:translate(…px…)`, 냠냠이 `data-ambient="true"` 는 소품 수에서 제외). lint·typecheck·test 42 통과, 페이지 오류 0. 사본 `code-v7c/`·`shots-v7c/`(전환 프레임 `blend.png`). 비교 페이지 v6 vs v7 = 아티팩트 Version 6(원본 `compare67/`). 작업 트리에는 **v7+Claude 수정**. **사용자 확인 대기**, 커밋 안 함.
+    - (완료) v7 다음에 **Claude 가 직접**(Codex 아님) 할 것 — 사용자 요청 2026-10-15: ① 냠냠이 애니메이션(지금은 전혀 없음, 몸짓이 순간 교체) — `motion` 스프링으로 몸짓 사이 보간 0.4~0.6초, 숨쉬기·눈 깜빡임, 몸짓별 동작(인사 흔들기·축하 점프+착지 찌그러짐·기다림 흔들기·새 사건 쪽으로 고개), reduced-motion 이면 반복 동작 끔, 시안 페이지에 몸짓 자동 재생 칸. ② **꽃 모양이 이상함**(`WorldPieces.tsx` `Flowers`: 꽃잎이 한 덩어리 얼룩 path 라 꽃잎이 구분 안 되고, 잎이 줄기를 감은 고리처럼 보임) → 둥근 꽃잎 5장이 구분되는 꽃 + 줄기 양옆 잎 두 장으로.
+  - 승인 후 할 일: `/play` 를 `GardenScene` 으로 교체(motion 등장·잎 펼침·병아리 시선), 대사를 성장 부품 순간에 맞게 `content/lines.ts` 갱신, 보호자 메뉴(시뮬레이터·상태·처음부터), 기존 숲 맵/`Progress`/패널 제거, e2e 기준 스크린샷 다시 만들기.
+  - 참고 자료 확인 범위: 베베핀 스토어 스크린샷만(트레일러 X), 핑크퐁 홍보 영상 프레임만(음성 X), Sago Mini 홍보 영상 프레임만. 요청에 적힌 "첨부 이미지"는 메시지에 없었음.
 
 ## 다음 할 일 (우선순위 순)
 
@@ -86,6 +105,8 @@ npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 - 시뮬레이터로 시험할 때: 음식을 올린 뒤 약 5초(필터 안정 ~2초 + 3초 유지)는 그대로 둬야 `SERVED` 가 된다. 그 전에 값을 바꾸면 유지 타이머가 다시 시작된다.
 - Claude in Chrome 탭이 뒤에 있으면(`document.visibilityState === "hidden"`) motion 애니메이션이 멈춰 말풍선(`AnimatePresence mode="wait"`)이 이전 대사에 머문다. 스크린샷을 찍으면 따라잡는다 — 앱 버그 아님.
 - Playwright 스크린샷 기준 파일은 Windows 용(`*-win32.png`). 다른 OS/CI 에서는 기준이 없어 처음엔 실패한다 → 그 환경에서 `npx playwright test --update-snapshots` 로 따로 만든다. 화면을 의도적으로 바꾸면 기준도 다시 만든다.
+- 기준 스크린샷을 다시 만들 때 `--update-snapshots` 로 만든 6장에 Next 개발 표시 "1 Issue"(빨간 배지)가 찍혔다(2026-10-15, 원인 확인 필요 — 직전 서버 번들 불일치로 생긴 hydration 오류가 남은 것으로 보임). 기준 png 를 지우고 `npx playwright test play` 로 새로 쓰면 깨끗했다. 다시 만든 뒤 왼쪽 아래 배지가 없는지 확인할 것.
+- 개발 서버가 켜진 채 컴포넌트를 고치면 `/play` 의 서버 렌더가 옛 코드로 남아 hydration 오류가 날 때가 있다 → 해당 파일을 `touch` 하면 다시 컴파일됨.
 - `e2e/play.spec.ts` 는 개발 서버의 시뮬레이터 패널로 진행한다(TTS 는 지워서 결정적으로). 기기당 약 17초.
 - Playwright 브라우저는 chromium만 설치. 기기 6종 모두 chromium 뷰포트로 흉내 낸다(실제 Safari 아님).
 

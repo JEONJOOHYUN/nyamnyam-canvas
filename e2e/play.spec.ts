@@ -54,7 +54,7 @@ test("play screen fits the device at stage 5", async ({ page }) => {
   expect(scroll).toEqual({ x: 0, y: 0 });
 
   const parts = [
-    page.getByText("예쁜 꽃이 피었어~"),
+    page.getByText("망원경이 생겼어! 저기 봐!"),
     page.getByRole("button", { name: "냠냠이" }),
     page.getByRole("progressbar"),
     page.getByRole("button", { name: "배불러요" }),

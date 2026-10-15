@@ -1,14 +1,17 @@
 "use client";
 
+import { MotionConfig, useMotionValue } from "motion/react";
 import {
-  AnimatePresence,
-  MotionConfig,
-  motion,
-  useMotionValue,
-} from "motion/react";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { Nyamnyam } from "@/components/characters/Nyamnyam";
-import { ForestMap } from "@/components/maps/forest/ForestMap";
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { Chick } from "@/components/garden/Chick";
+import { GardenScene, type ChickPose } from "@/components/garden/GardenScene";
+import { visiblePieces } from "@/components/garden/growth";
 import { pickLine, type CharacterId, type LineKey } from "@/content/lines";
 import { sfx, unlockAudio } from "@/lib/audio/sfx";
 import { speak, stopSpeaking } from "@/lib/audio/voice";
@@ -19,18 +22,31 @@ import {
   type MealEvent,
   type MealState,
 } from "@/lib/meal/machine";
-import { shouldPromptIdle, STAGE_COUNT, stageFor } from "@/lib/meal/stage";
+import {
+  DEFAULT_STAGE_THRESHOLDS,
+  shouldPromptIdle,
+  STAGE_COUNT,
+  stageFor,
+} from "@/lib/meal/stage";
 import { createWeightSource } from "@/lib/weight";
 import { SimulatorSource } from "@/lib/weight/simulator";
 import type { WeightReading } from "@/lib/weight/types";
 import { Confetti, Stamp } from "./Celebration";
-import { Progress } from "./Progress";
 import { SimulatorPanel } from "./SimulatorPanel";
 
 // shortcut: parent settings arrive in stage 6; until then these are the spec defaults.
 const SETTINGS = { showPercent: true, fullButton: true, stampAt: 0.7 };
 const CHARACTER: CharacterId = "nyamnyam";
 const SHOW_SIMULATOR = process.env.NODE_ENV !== "production";
+
+// The scene finishes at the last stage threshold, when the completion cheer plays.
+const SCENE_DONE_AT = DEFAULT_STAGE_THRESHOLDS[STAGE_COUNT - 1] / 100;
+const PORTRAIT = "(orientation: portrait)";
+const subscribePortrait = (onChange: () => void) => {
+  const query = window.matchMedia(PORTRAIT);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
 
 type Action = MealEvent | { type: "reset" };
 const reduce = (s: MealState, a: Action) =>
@@ -53,6 +69,34 @@ export function PlayScreen() {
   const stage = stageFor(meal.progress);
   const eating = meal.phase === "SERVED" || meal.phase === "EATING";
   const celebrating = stage === STAGE_COUNT && !celebrationOver;
+  const portrait = useSyncExternalStore(
+    subscribePortrait,
+    () => window.matchMedia(PORTRAIT).matches,
+    () => false,
+  );
+
+  // Point at each newly added piece for a moment (adjusting state during render, no effect).
+  const sceneProgress = Math.min(1, meal.progress / SCENE_DONE_AT);
+  const pieceCount = visiblePieces(sceneProgress).length;
+  const [seenPieces, setSeenPieces] = useState(pieceCount);
+  const [pointing, setPointing] = useState(false);
+  if (pieceCount !== seenPieces) {
+    setSeenPieces(pieceCount);
+    setPointing(pieceCount > 0);
+  }
+  useEffect(() => {
+    if (!pointing) return;
+    const t = setTimeout(() => setPointing(false), 2400);
+    return () => clearTimeout(t);
+  }, [pointing, seenPieces]);
+  const pose: ChickPose = celebrating
+    ? "celebrate"
+    : meal.lifted || meal.phase === "ENDED"
+      ? "wait"
+      : pointing
+        ? "point"
+        : "hello";
+  const pct = Math.round(meal.progress * 100);
 
   const say = useCallback(
     (key: LineKey) => {
@@ -186,87 +230,74 @@ export function PlayScreen() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <main className="grid h-dvh select-none grid-rows-[minmax(0,1fr)_auto] overflow-hidden bg-[#8FD3FF] font-kid text-[#5B4636] landscape:grid-cols-[7fr_3fr] landscape:grid-rows-1">
-        <section className="relative min-h-0 overflow-hidden">
-          <ForestMap stage={stage} />
-          <span className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[max(0.75rem,env(safe-area-inset-top))] rounded-full bg-white/70 px-3 py-1 font-sans text-xs text-[#7A5C45]">
-            {statusLabel}
-          </span>
-        </section>
-
-        <aside className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-t-[2rem] bg-[#FFF8E8] px-[max(1rem,calc(50%-20rem))] pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-6px_20px_rgba(0,0,0,0.08)] landscape:grid-cols-1 landscape:content-center landscape:justify-items-center landscape:rounded-l-[2rem] landscape:rounded-tr-none landscape:pl-4 landscape:pr-[max(1rem,env(safe-area-inset-right))] landscape:shadow-[-6px_0_20px_rgba(0,0,0,0.08)]">
-          <Nyamnyam
-            mouth={mouth}
-            jump={stage}
-            dancing={celebrating}
-            onTouch={touch}
-            className="size-[clamp(6.5rem,24vmin,13rem)]"
-          />
-          <div
-            className="min-h-[3.5rem] landscape:order-first landscape:w-full"
-            aria-live="polite"
+      <main className="relative h-dvh select-none overflow-hidden bg-[#91dfff] font-kid text-[#244c50]">
+        <GardenScene
+          progress={sceneProgress}
+          layout={portrait ? "tall" : "wide"}
+          pose={pose}
+          bubble={bubble}
+          onChickTap={touch}
+          mouth={mouth}
+        />
+        <span className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[max(0.75rem,env(safe-area-inset-top))] rounded-full bg-white/70 px-3 py-1 font-sans text-xs text-[#245964]">
+          {statusLabel}
+        </span>
+        {/* Top-right keeps the bottom of the scene, where pieces grow, uncovered. */}
+        <div className="absolute right-[max(0.75rem,env(safe-area-inset-right))] top-[max(0.75rem,env(safe-area-inset-top))] flex flex-col items-end gap-3">
+          <span
+            role="progressbar"
+            aria-label="먹은 만큼"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={pct}
+            className={
+              SETTINGS.showPercent
+                ? "rounded-full bg-white/80 px-4 py-1 text-[clamp(1rem,3vmin,1.4rem)]"
+                : "sr-only"
+            }
           >
-            <AnimatePresence mode="wait">
-              {bubble && (
-                <motion.p
-                  key={bubble}
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  className="relative rounded-3xl bg-white px-4 py-3 text-center text-[clamp(1.15rem,3.6vmin,1.75rem)] leading-snug break-keep text-balance shadow-sm"
-                >
-                  {bubble}
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </div>
-          <div className="col-span-2 w-full landscape:col-span-1">
-            <Progress
-              progress={meal.progress}
-              stage={stage}
-              showPercent={SETTINGS.showPercent}
-            />
-          </div>
-          <div className="col-span-2 flex w-full justify-center gap-3 landscape:col-span-1">
-            {SETTINGS.fullButton && eating && (
-              <button
-                type="button"
-                onClick={full}
-                className="min-h-14 flex-1 rounded-full bg-[#FF9A3C] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-md active:translate-y-px"
-              >
-                배불러요
-              </button>
-            )}
-            {meal.phase === "ENDED" && (
-              <button
-                type="button"
-                onClick={reset}
-                className="min-h-14 flex-1 rounded-full bg-[#6CC36A] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-md active:translate-y-px"
-              >
-                새 그림 시작
-              </button>
-            )}
-          </div>
-        </aside>
+            {pct}%
+          </span>
+          {SETTINGS.fullButton && eating && (
+            <button
+              type="button"
+              onClick={full}
+              className="min-h-14 min-w-36 rounded-full border-2 border-white bg-[#006b86] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#004759] active:translate-y-px"
+            >
+              배불러요
+            </button>
+          )}
+          {meal.phase === "ENDED" && (
+            <button
+              type="button"
+              onClick={reset}
+              className="min-h-14 min-w-36 rounded-full border-2 border-white bg-[#3f9b3c] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#2a6d28] active:translate-y-px"
+            >
+              새 그림 시작
+            </button>
+          )}
+        </div>
 
         {celebrating && <Confetti />}
         {stamped && <Stamp />}
 
         {!started && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-[#FFF8E8] p-6">
+          <div className="fixed inset-0 z-50 grid place-items-center bg-[#d4f3ff] p-6">
             <div className="flex flex-col items-center gap-6 text-center">
-              <h1 className="text-[clamp(2.5rem,9vmin,4.5rem)] text-[#F4A62A]">
+              <h1 className="text-[clamp(2.5rem,9vmin,4.5rem)] text-[#006b86]">
                 냠냠캔버스
               </h1>
-              <Nyamnyam
-                mouth={mouth}
-                jump={0}
+              <svg
+                viewBox="-130 -240 260 270"
+                aria-hidden="true"
                 className="size-[clamp(9rem,32vmin,15rem)]"
-              />
+              >
+                <Chick pose="hello" />
+              </svg>
               <button
                 type="button"
                 onClick={start}
-                className="min-h-16 rounded-full bg-[#FF9A3C] px-12 text-[clamp(1.6rem,5vmin,2.2rem)] text-white shadow-lg active:translate-y-px"
+                className="min-h-16 rounded-full bg-[#006b86] px-12 text-[clamp(1.6rem,5vmin,2.2rem)] text-white shadow-lg active:translate-y-px"
               >
                 시작하기
               </button>

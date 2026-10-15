@@ -1,0 +1,279 @@
+﻿.garden-arrival {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: garden-settle 550ms ease-out both;
+}
+.garden-sparkles {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  pointer-events: none;
+}
+.garden-highlight {
+  animation: garden-sparkle 650ms ease-out both;
+}
+.garden-flutter,
+.garden-wings,
+.garden-spin,
+.garden-drift,
+.garden-smoke {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.garden-flutter {
+  animation: garden-flutter 3s ease-in-out infinite alternate;
+}
+.garden-wings {
+  animation: garden-wings 2s ease-in-out infinite alternate;
+}
+.garden-spin {
+  animation: garden-spin 12s linear infinite;
+}
+.garden-drift {
+  animation: garden-drift 16s ease-in-out infinite alternate;
+}
+.garden-smoke {
+  animation: garden-smoke 5s ease-in-out infinite;
+}
+.garden-scene[data-garden-active="false"] [data-ambient] {
+  animation-play-state: paused;
+}
+[data-state="growth"] .garden-scene * {
+  animation: none;
+}
+@keyframes garden-settle {
+  0% {
+    transform: translateY(-24px) scale(0.98);
+  }
+  65% {
+    transform: translateY(0) scale(1.06);
+  }
+  82% {
+    transform: translateY(-5px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes garden-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+@keyframes garden-flutter {
+  to {
+    transform: rotate(5deg) scaleX(0.92);
+  }
+}
+@keyframes garden-wings {
+  to {
+    transform: scaleX(0.55) rotate(4deg);
+  }
+}
+@keyframes garden-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes garden-drift {
+  to {
+    transform: translate(48px, -14px) rotate(5deg);
+  }
+}
+@keyframes garden-smoke {
+  0% {
+    opacity: 0.25;
+    transform: translateY(4px) scale(0.85);
+  }
+  50% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0.25;
+    transform: translateY(-12px) scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .garden-arrival,
+  .garden-sparkles,
+  .garden-highlight,
+  .garden-flutter,
+  .garden-wings,
+  .garden-spin,
+  .garden-drift,
+  .garden-smoke {
+    animation: none;
+  }
+  .garden-sparkles {
+    opacity: 0;
+  }
+}
+
+.garden-bird-wings {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: garden-bird-wings 1.8s ease-in-out infinite alternate;
+}
+.garden-tether {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: garden-tether 4s ease-in-out infinite alternate;
+}
+.garden-flag {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: garden-flutter 2.5s ease-in-out infinite alternate;
+}
+@keyframes garden-bird-wings {
+  to {
+    transform: scaleY(0.78) rotate(5deg);
+  }
+}
+@keyframes garden-tether {
+  to {
+    transform: rotate(3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .garden-bird-wings,
+  .garden-tether,
+  .garden-flag {
+    animation: none;
+  }
+}
+
+/* Nyamnyam: pose changes blend through one soft overshoot curve; loops add life. */
+.chick-move {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition: transform 560ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.chick-breathe,
+.chick-hop,
+.chick-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.chick-breathe {
+  animation: chick-breathe 3.2s ease-in-out infinite;
+}
+.chick-hop {
+  animation: chick-hop 1.4s ease-in-out infinite;
+}
+.chick-sway {
+  animation: chick-sway 3.4s ease-in-out infinite alternate;
+}
+.chick-wave {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: chick-wave 3.6s ease-in-out infinite;
+}
+.chick-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chick-blink 4.6s linear infinite;
+}
+.chick-twinkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chick-twinkle 0.9s ease-in-out infinite alternate;
+}
+.garden-bloom {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: garden-bloom 700ms cubic-bezier(0.34, 1.5, 0.64, 1) both;
+}
+@keyframes chick-breathe {
+  50% {
+    transform: scale(1.015, 1.03);
+  }
+}
+@keyframes chick-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  14% {
+    transform: translateY(0) scale(1.06, 0.92);
+  }
+  42% {
+    transform: translateY(-12px) scale(0.97, 1.05);
+  }
+  66% {
+    transform: translateY(0) scale(1.08, 0.9);
+  }
+  80% {
+    transform: translateY(0) scale(0.98, 1.02);
+  }
+}
+@keyframes chick-sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+@keyframes chick-wave {
+  0%,
+  45%,
+  100% {
+    transform: rotate(0deg);
+  }
+  9%,
+  27% {
+    transform: rotate(-16deg);
+  }
+  18%,
+  36% {
+    transform: rotate(8deg);
+  }
+}
+@keyframes chick-blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes chick-twinkle {
+  from {
+    transform: scale(0.8) rotate(0deg);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.15) rotate(15deg);
+    opacity: 1;
+  }
+}
+@keyframes garden-bloom {
+  from {
+    transform: scale(0.3) rotate(-40deg);
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chick-move {
+    transition: none;
+  }
+  .chick-breathe,
+  .chick-hop,
+  .chick-sway,
+  .chick-wave,
+  .chick-blink,
+  .chick-twinkle,
+  .garden-bloom {
+    animation: none;
+  }
+}

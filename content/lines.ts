@@ -36,16 +36,20 @@ const nyamnyam: CharacterLines = {
     { id: "tray-food", text: "이제 맛있는 밥을 담아 줘!", tip: "설레는 느낌" },
   ],
   serve: [{ id: "serve", text: "우와, 맛있겠다! 같이 먹자!", tip: "신나게" }],
-  stage1: [{ id: "stage-1", text: "씨앗이 생겼어! 냠냠!", tip: "놀라며" }],
-  stage2: [{ id: "stage-2", text: "새싹이 쏙 나왔어!", tip: "'쏙' 강조" }],
-  stage3: [{ id: "stage-3", text: "작은 나무가 됐어!", tip: "뿌듯하게" }],
-  stage4: [{ id: "stage-4", text: "나무가 쑥쑥 컸어!", tip: "'쑥쑥' 리듬감" }],
-  stage5: [{ id: "stage-5", text: "예쁜 꽃이 피었어~", tip: "끝을 길게" }],
-  stage6: [{ id: "stage-6", text: "열매가 주렁주렁 열렸어!", tip: "신나게" }],
-  stage7: [
-    { id: "stage-7", text: "새랑 무지개가 놀러 왔어!", tip: "아주 기쁘게" },
+  stage1: [{ id: "stage-1", text: "편지가 날아왔어! 냠냠!", tip: "놀라며" }],
+  stage2: [{ id: "stage-2", text: "빨간 우체통이 생겼어!", tip: "신나게" }],
+  stage3: [
+    { id: "stage-3", text: "우체국이 뚝딱 지어졌어!", tip: "'뚝딱' 강조" },
   ],
-  complete: [{ id: "complete", text: "와아! 그림이 완성됐어!", tip: "환호" }],
+  stage4: [
+    { id: "stage-4", text: "바람개비가 빙글빙글!", tip: "'빙글빙글' 리듬감" },
+  ],
+  stage5: [
+    { id: "stage-5", text: "망원경이 생겼어! 저기 봐!", tip: "뿌듯하게" },
+  ],
+  stage6: [{ id: "stage-6", text: "돛배가 둥둥 떠 있어~", tip: "끝을 길게" }],
+  stage7: [{ id: "stage-7", text: "꽃이 활짝 피었어!", tip: "아주 기쁘게" }],
+  complete: [{ id: "complete", text: "와아! 우체국이 완성됐어!", tip: "환호" }],
   full: [{ id: "full", text: "배부르구나! 잘 먹었어!", tip: "다정하게" }],
   fullStamp: [
     { id: "full-stamp", text: "오늘 도장 쾅! 최고야!", tip: "'쾅' 강조" },
