@@ -136,7 +136,226 @@ const nyamnyam: CharacterLines = {
   ],
 };
 
-export const lines = { nyamnyam } satisfies Record<string, CharacterLines>;
+// 퐁당이 (baby sea otter): cheerful little prankster, splashy sound words.
+const pongdang: CharacterLines = {
+  hello: [
+    { id: "hello", text: "퐁당! 안녕, 나는 퐁당이야!", tip: "통통 튀게" },
+  ],
+  trayEmpty: [
+    {
+      id: "tray-empty",
+      text: "빈 식판을 살짝 올려 줄래?",
+      tip: "부드럽게 부탁",
+    },
+  ],
+  trayFood: [
+    {
+      id: "tray-food",
+      text: "맛있는 밥을 담아 주면 좋겠다!",
+      tip: "설레는 느낌",
+    },
+  ],
+  serve: [{ id: "serve", text: "와아, 냠냠 파티 시작이다!", tip: "신나게" }],
+  stage1: [
+    { id: "stage-1", text: "편지가 퐁당 날아왔어!", tip: "'퐁당' 강조" },
+  ],
+  stage2: [{ id: "stage-2", text: "빨간 우체통이다! 신난다!", tip: "신나게" }],
+  stage3: [{ id: "stage-3", text: "우와, 우체국이 생겼다!", tip: "놀라며" }],
+  stage4: [
+    { id: "stage-4", text: "바람개비가 뱅글뱅글~", tip: "'뱅글뱅글' 리듬감" },
+  ],
+  stage5: [{ id: "stage-5", text: "망원경으로 같이 보자!", tip: "신나게" }],
+  stage6: [
+    { id: "stage-6", text: "돛배가 둥실둥실 떠 있어!", tip: "흔들흔들" },
+  ],
+  stage7: [{ id: "stage-7", text: "꽃이 활짝! 짝짝짝!", tip: "박수 치듯" }],
+  complete: [{ id: "complete", text: "야호! 우체국 완성이다!", tip: "환호" }],
+  "sea:stage1": [
+    { id: "sea-stage-1", text: "물방울이 보글보글 퐁당!", tip: "리듬감" },
+  ],
+  "sea:stage2": [
+    { id: "sea-stage-2", text: "물고기 친구들 안녕!", tip: "손 흔들듯" },
+  ],
+  "sea:stage3": [
+    { id: "sea-stage-3", text: "우와, 조개 궁전이다! 퐁당!", tip: "놀라며" },
+  ],
+  "sea:stage4": [
+    { id: "sea-stage-4", text: "거북이가 둥실둥실 왔어!", tip: "느긋하게" },
+  ],
+  "sea:stage5": [
+    { id: "sea-stage-5", text: "보물상자다! 반짝반짝!", tip: "뿌듯하게" },
+  ],
+  "sea:stage6": [
+    { id: "sea-stage-6", text: "해마야, 같이 놀자!", tip: "신나게" },
+  ],
+  "sea:stage7": [
+    { id: "sea-stage-7", text: "고래가 물을 뿜었어!", tip: "아주 기쁘게" },
+  ],
+  "sea:complete": [
+    { id: "sea-complete", text: "야호! 바다 왕국 완성이다!", tip: "환호" },
+  ],
+  "space:stage1": [
+    { id: "space-stage-1", text: "별이 반짝 떴어!", tip: "'반짝' 강조" },
+  ],
+  "space:stage2": [
+    { id: "space-stage-2", text: "혜성이 슝 지나갔어!", tip: "'슝' 강조" },
+  ],
+  "space:stage3": [
+    { id: "space-stage-3", text: "우리 기지가 생겼다!", tip: "놀라며" },
+  ],
+  "space:stage4": [
+    { id: "space-stage-4", text: "로켓이 뚝딱 완성!", tip: "'뚝딱' 강조" },
+  ],
+  "space:stage5": [
+    { id: "space-stage-5", text: "우주인 친구 안녕!", tip: "손 흔들듯" },
+  ],
+  "space:stage6": [
+    {
+      id: "space-stage-6",
+      text: "월면차가 부릉부릉!",
+      tip: "'부릉부릉' 리듬감",
+    },
+  ],
+  "space:stage7": [
+    {
+      id: "space-stage-7",
+      text: "로켓에 불이 붙었다! 슝~",
+      tip: "아주 기쁘게",
+    },
+  ],
+  "space:complete": [
+    { id: "space-complete", text: "야호! 우주 마을 완성이다!", tip: "환호" },
+  ],
+  full: [{ id: "full", text: "배불러? 짝짝짝, 잘 먹었어!", tip: "다정하게" }],
+  fullStamp: [
+    { id: "full-stamp", text: "도장 쾅! 오늘 최고였어!", tip: "'쾅' 강조" },
+  ],
+  pause: [{ id: "pause", text: "잠깐 둥실둥실 쉬는 중~", tip: "느긋하게" }],
+  idle: [
+    { id: "idle-1", text: "천천히 먹자~ 둥실둥실 기다릴게!", tip: "느긋하게" },
+    { id: "idle-2", text: "퐁당이는 여기 있을게!", tip: "다정하게" },
+    { id: "idle-3", text: "꼭꼭 씹으면 더 맛있어!", tip: "느긋하게" },
+  ],
+  touch: [
+    { id: "touch-1", text: "히히, 간지러워!", tip: "웃으며" },
+    { id: "touch-2", text: "퐁당! 나 여기 있어!", tip: "밝게" },
+    { id: "touch-3", text: "같이 놀까?", tip: "궁금하게, 끝 올림" },
+  ],
+};
+
+// 반짝이 (big-sister star): gentle and warm, praises softly.
+const banjjak: CharacterLines = {
+  hello: [{ id: "hello", text: "안녕~ 나는 반짝이 누나야.", tip: "다정하게" }],
+  trayEmpty: [
+    { id: "tray-empty", text: "빈 식판을 올려 줄래?", tip: "부드럽게 부탁" },
+  ],
+  trayFood: [
+    { id: "tray-food", text: "이제 맛있는 밥을 담아 볼까?", tip: "부드럽게" },
+  ],
+  serve: [{ id: "serve", text: "맛있겠다~ 우리 같이 먹자.", tip: "다정하게" }],
+  stage1: [{ id: "stage-1", text: "편지가 날아왔구나~", tip: "끝을 길게" }],
+  stage2: [{ id: "stage-2", text: "빨간 우체통이 생겼네~", tip: "끝을 길게" }],
+  stage3: [
+    { id: "stage-3", text: "우체국이 지어졌구나, 멋지다~", tip: "칭찬하듯" },
+  ],
+  stage4: [{ id: "stage-4", text: "바람개비가 빙글빙글 도네~", tip: "리듬감" }],
+  stage5: [
+    { id: "stage-5", text: "망원경이 생겼어, 저기 봐~", tip: "다정하게" },
+  ],
+  stage6: [{ id: "stage-6", text: "돛배가 둥실 떠 있구나~", tip: "끝을 길게" }],
+  stage7: [{ id: "stage-7", text: "꽃이 활짝 피었네, 예쁘다~", tip: "기쁘게" }],
+  complete: [
+    { id: "complete", text: "우체국이 완성됐어, 정말 멋져~", tip: "크게 칭찬" },
+  ],
+  "sea:stage1": [
+    { id: "sea-stage-1", text: "보글보글 물방울이 생겼구나~", tip: "리듬감" },
+  ],
+  "sea:stage2": [
+    { id: "sea-stage-2", text: "물고기 친구들이 놀러 왔네~", tip: "다정하게" },
+  ],
+  "sea:stage3": [
+    { id: "sea-stage-3", text: "조개 궁전이 생겼구나~", tip: "놀라며" },
+  ],
+  "sea:stage4": [
+    {
+      id: "sea-stage-4",
+      text: "거북이가 천천히 헤엄쳐 왔네~",
+      tip: "느긋하게",
+    },
+  ],
+  "sea:stage5": [
+    { id: "sea-stage-5", text: "반짝반짝 보물상자구나~", tip: "뿌듯하게" },
+  ],
+  "sea:stage6": [
+    { id: "sea-stage-6", text: "해마가 인사하네, 귀엽다~", tip: "다정하게" },
+  ],
+  "sea:stage7": [
+    { id: "sea-stage-7", text: "고래가 반겨 주네, 멋지다~", tip: "기쁘게" },
+  ],
+  "sea:complete": [
+    {
+      id: "sea-complete",
+      text: "바다 왕국이 완성됐어, 정말 멋져~",
+      tip: "크게 칭찬",
+    },
+  ],
+  "space:stage1": [
+    { id: "space-stage-1", text: "반짝반짝 별이 떴구나~", tip: "리듬감" },
+  ],
+  "space:stage2": [
+    { id: "space-stage-2", text: "혜성이 슝 지나가네~", tip: "'슝' 강조" },
+  ],
+  "space:stage3": [
+    { id: "space-stage-3", text: "우리 기지가 생겼구나~", tip: "놀라며" },
+  ],
+  "space:stage4": [
+    { id: "space-stage-4", text: "로켓이 완성됐네, 대단해~", tip: "칭찬하듯" },
+  ],
+  "space:stage5": [
+    { id: "space-stage-5", text: "우주인 친구가 왔구나~", tip: "다정하게" },
+  ],
+  "space:stage6": [
+    { id: "space-stage-6", text: "월면차가 부릉부릉 달리네~", tip: "리듬감" },
+  ],
+  "space:stage7": [
+    { id: "space-stage-7", text: "로켓에 불이 켜졌네, 멋지다~", tip: "기쁘게" },
+  ],
+  "space:complete": [
+    {
+      id: "space-complete",
+      text: "우주 마을이 완성됐어, 정말 멋져~",
+      tip: "크게 칭찬",
+    },
+  ],
+  full: [{ id: "full", text: "배불렀구나, 정말 잘 먹었어~", tip: "다정하게" }],
+  fullStamp: [
+    {
+      id: "full-stamp",
+      text: "오늘 도장 쾅! 누나가 칭찬해~",
+      tip: "'쾅' 강조",
+    },
+  ],
+  pause: [{ id: "pause", text: "잠깐 쉬어도 괜찮아~", tip: "느긋하게" }],
+  idle: [
+    {
+      id: "idle-1",
+      text: "천천히 먹어도 돼, 누나가 기다릴게~",
+      tip: "느긋하게",
+    },
+    { id: "idle-2", text: "꼭꼭 씹어 먹는 거 멋지다~", tip: "칭찬하듯" },
+    { id: "idle-3", text: "누나는 여기서 응원할게~", tip: "다정하게" },
+  ],
+  touch: [
+    { id: "touch-1", text: "어머, 간지러워~", tip: "웃으며" },
+    { id: "touch-2", text: "누나 불렀어?", tip: "궁금하게, 끝 올림" },
+    { id: "touch-3", text: "반짝반짝~ 반가워!", tip: "밝게" },
+  ],
+};
+
+export const lines = { nyamnyam, pongdang, banjjak } satisfies Record<
+  string,
+  CharacterLines
+>;
 export type CharacterId = keyof typeof lines;
 
 const isThemed = (key: LineKey): key is ThemedKey =>

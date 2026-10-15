@@ -5,6 +5,8 @@ import { getAudioContext } from "./sfx";
 // Browser TTS stand-in until the Clova Dubbing files exist (spec §13).
 const TTS_VOICE: Record<CharacterId, { pitch: number; rate: number }> = {
   nyamnyam: { pitch: 1.6, rate: 0.95 },
+  pongdang: { pitch: 1.35, rate: 1 },
+  banjjak: { pitch: 1.15, rate: 0.9 },
 };
 
 let voiceVolume = 1;
