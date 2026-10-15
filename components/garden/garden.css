@@ -277,3 +277,143 @@
     animation: none;
   }
 }
+
+.sea-rise {
+  animation: sea-rise 5s ease-in-out infinite alternate;
+}
+.sea-sway {
+  transform-origin: 0 0;
+  animation: sea-sway 3.5s ease-in-out infinite alternate;
+}
+.sea-swim {
+  animation: sea-swim 5s ease-in-out infinite alternate;
+}
+.sea-float {
+  animation: sea-float 4s ease-in-out infinite alternate;
+}
+.sea-tentacles {
+  animation: sea-tentacles 2.8s ease-in-out infinite alternate;
+}
+.sea-whale {
+  animation: sea-swim 7s ease-in-out infinite alternate;
+}
+@keyframes sea-rise {
+  to {
+    transform: translateY(-16px);
+  }
+}
+@keyframes sea-sway {
+  to {
+    transform: rotate(4deg);
+  }
+}
+@keyframes sea-swim {
+  to {
+    transform: translate(12px, -5px);
+  }
+}
+@keyframes sea-float {
+  to {
+    transform: translateY(-9px) rotate(3deg);
+  }
+}
+@keyframes sea-tentacles {
+  to {
+    transform: scaleY(0.86);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sea-rise,
+  .sea-sway,
+  .sea-swim,
+  .sea-float,
+  .sea-tentacles,
+  .sea-whale {
+    animation: none;
+  }
+}
+
+.space-twinkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: space-twinkle 3s ease-in-out infinite alternate;
+}
+.space-orbit {
+  animation: space-orbit 9s ease-in-out infinite alternate;
+}
+.space-float {
+  animation: space-float 4s ease-in-out infinite alternate;
+}
+.space-wave {
+  transform-origin: 24px -34px;
+  animation: space-wave 3s ease-in-out infinite alternate;
+}
+.space-bounce {
+  animation: space-bounce 3.8s ease-in-out infinite;
+}
+.space-glow {
+  animation: space-glow 4s ease-in-out infinite alternate;
+}
+.space-launch {
+  transition: transform 1.4s ease-out;
+}
+.garden-scene[data-garden-active="false"] .space-launch,
+[data-state="growth"] .space-launch {
+  transition: none;
+}
+.garden-scene:has(:where([data-finale="space-village"])) .space-base-lights {
+  fill: #fff6a1;
+  animation: space-glow 2s ease-in-out infinite alternate;
+}
+.garden-scene:has(:where([data-finale="space-village"])) .space-launch {
+  transform: translateY(-18px);
+}
+.garden-scene:has(:where([data-finale="space-village"])) .space-wave,
+.garden-scene:has(:where([data-finale="space-village"])) .space-bounce {
+  animation-duration: 1.2s;
+}
+@keyframes space-twinkle {
+  to {
+    transform: scale(1.08);
+    filter: brightness(1.2);
+  }
+}
+@keyframes space-orbit {
+  to {
+    transform: rotate(12deg);
+  }
+}
+@keyframes space-float {
+  to {
+    transform: translateY(-9px);
+  }
+}
+@keyframes space-wave {
+  to {
+    transform: rotate(-20deg);
+  }
+}
+@keyframes space-bounce {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes space-glow {
+  to {
+    filter: brightness(1.2) drop-shadow(0 0 5px #fff3af);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .garden-scene .space-twinkle,
+  .garden-scene .space-orbit,
+  .garden-scene .space-float,
+  .garden-scene .space-wave,
+  .garden-scene .space-bounce,
+  .garden-scene .space-glow,
+  .garden-scene:has(:where([data-finale="space-village"])) .space-base-lights {
+    animation: none;
+  }
+  .garden-scene .space-launch {
+    transition: none;
+  }
+}

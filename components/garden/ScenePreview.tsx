@@ -5,9 +5,13 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GardenScene, type GardenSceneProps } from "./GardenScene";
 import { Chick, CHICK_POSES, POSE_LABELS } from "./Chick";
-import { buildProgress, visiblePieces } from "./growth";
+import { buildProgress } from "./growth";
+import { THEMES } from "./themes";
 
-export function BuildPreview({ layout }: Pick<GardenSceneProps, "layout">) {
+export function BuildPreview({
+  layout,
+  theme = "post",
+}: Pick<GardenSceneProps, "layout" | "theme">) {
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const elapsed = useRef(0);
@@ -19,15 +23,15 @@ export function BuildPreview({ layout }: Pick<GardenSceneProps, "layout">) {
       const now = performance.now();
       elapsed.current += now - previous;
       previous = now;
-      const next = buildProgress(elapsed.current);
-      setProgress(visiblePieces(next).at(-1)?.at ?? 0);
+      setProgress(buildProgress(elapsed.current, THEMES[theme].events));
     }, 50);
     return () => window.clearInterval(timer);
-  }, [paused]);
+  }, [paused, theme]);
 
   return (
     <>
       <GardenScene
+        theme={theme}
         progress={progress}
         layout={layout}
         pose={progress === 1 ? "celebrate" : "wonder"}
@@ -45,7 +49,10 @@ export function BuildPreview({ layout }: Pick<GardenSceneProps, "layout">) {
 }
 
 // Cycles through every pose so the blend between poses can be watched.
-export function PoseLoop() {
+export function PoseLoop({
+  theme = "post",
+  layout = "wide",
+}: Partial<Pick<GardenSceneProps, "theme" | "layout">>) {
   const [index, setIndex] = useState(0);
   useEffect(() => {
     const timer = window.setInterval(
@@ -55,6 +62,32 @@ export function PoseLoop() {
     return () => window.clearInterval(timer);
   }, []);
   const pose = CHICK_POSES[index];
+  if (theme !== "post")
+    return (
+      <figure className="mx-auto max-w-3xl overflow-hidden rounded-3xl bg-[#d4fff2]">
+        <div
+          className={
+            layout === "tall"
+              ? "mx-auto aspect-[520/1000] max-w-sm"
+              : "aspect-[4/3]"
+          }
+        >
+          <GardenScene
+            theme={theme}
+            progress={1}
+            layout={layout}
+            pose={pose}
+            bubble={null}
+          />
+        </div>
+        <figcaption
+          className="py-3 text-center font-kid text-xl"
+          aria-live="polite"
+        >
+          {POSE_LABELS[pose]}
+        </figcaption>
+      </figure>
+    );
   return (
     <figure className="mx-auto w-72 rounded-3xl bg-[#d4f3ff] py-5">
       <svg

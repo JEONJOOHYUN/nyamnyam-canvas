@@ -1,5 +1,7 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { THEMES, type GardenThemeKey } from "@/components/garden/themes";
 import { GardenScene } from "@/components/garden/GardenScene";
 import { Chick, CHICK_POSES, POSE_LABELS } from "@/components/garden/Chick";
 import {
@@ -28,7 +30,18 @@ export default function GardenDesignPage({
 }
 
 async function DesignGallery({ searchParams }: { searchParams: SearchParams }) {
-  const layout = (await searchParams).layout === "tall" ? "tall" : "wide";
+  const params = await searchParams;
+  const layout = params.layout === "tall" ? "tall" : "wide";
+  const theme =
+    params.theme === "space"
+      ? "space"
+      : params.theme === "sea"
+        ? "sea"
+        : "post";
+  const checkpoints =
+    theme !== "post"
+      ? [0, 0.09, 0.18, 0.27, 0.33, 0.45, 0.55, 0.64, 0.73, 0.82, 0.99, 1]
+      : [0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.55, 0.64, 0.73, 0.82, 0.91, 1];
   return (
     <main className="bg-[#edfbff] text-[#245964]">
       {(
@@ -58,7 +71,7 @@ async function DesignGallery({ searchParams }: { searchParams: SearchParams }) {
           data-state={state}
           className="relative h-dvh overflow-hidden"
         >
-          <ScenePreview {...props} layout={layout} />
+          <ScenePreview {...props} layout={layout} theme={theme} />
         </section>
       ))}
       <section data-state="faces" className="px-8 py-12">
@@ -70,16 +83,36 @@ async function DesignGallery({ searchParams }: { searchParams: SearchParams }) {
           {CHICK_POSES.map((pose) => (
             <figure
               key={pose}
-              className="min-w-40 flex-1 rounded-3xl bg-[#d4f3ff] py-5"
+              className={
+                theme !== "post"
+                  ? "min-w-80 flex-1 overflow-hidden rounded-3xl bg-[#d4f3ff] py-5"
+                  : "min-w-40 flex-1 rounded-3xl bg-[#d4f3ff] py-5"
+              }
             >
-              <svg
-                viewBox="-130 -240 260 270"
-                role="img"
-                aria-label={POSE_LABELS[pose]}
-                className="w-full"
-              >
-                <Chick pose={pose} />
-              </svg>
+              {theme !== "post" ? (
+                <div
+                  className={
+                    layout === "tall" ? "aspect-[520/1000]" : "aspect-[4/3]"
+                  }
+                >
+                  <GardenScene
+                    theme={theme}
+                    progress={1}
+                    layout={layout}
+                    pose={pose}
+                    bubble={null}
+                  />
+                </div>
+              ) : (
+                <svg
+                  viewBox="-130 -240 260 270"
+                  role="img"
+                  aria-label={POSE_LABELS[pose]}
+                  className="w-full"
+                >
+                  <Chick pose={pose} />
+                </svg>
+              )}
               <figcaption className="text-center font-kid text-xl">
                 {POSE_LABELS[pose]}
               </figcaption>
@@ -91,7 +124,7 @@ async function DesignGallery({ searchParams }: { searchParams: SearchParams }) {
         <p className="mb-4 text-center text-sm text-[#5d7a80]">
           몸짓이 2.4초마다 바뀌어요. 바뀔 때 이어지는 움직임을 보세요.
         </p>
-        <PoseLoop />
+        <PoseLoop theme={theme} layout={layout} />
       </section>
       <section data-state="growth" className="px-8 pb-12 pt-6">
         <p className="text-xs tracking-[.2em] text-[#7f8e76]">
@@ -101,15 +134,14 @@ async function DesignGallery({ searchParams }: { searchParams: SearchParams }) {
           한 걸음마다, 새로운 발견
         </h2>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {[
-            0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.55, 0.64, 0.73, 0.82, 0.91, 1,
-          ].map((progress) => (
+          {checkpoints.map((progress) => (
             <figure
               key={progress}
               className="overflow-hidden rounded-2xl border border-[#cbd1bc]"
             >
               <div className="aspect-[4/3]">
                 <GardenScene
+                  theme={theme}
                   progress={progress}
                   layout="wide"
                   bubble={null}
@@ -134,10 +166,32 @@ async function DesignGallery({ searchParams }: { searchParams: SearchParams }) {
       <section
         data-state="build"
         className="relative h-dvh overflow-hidden"
-        aria-label="우체국 짓기 자동 시연"
+        aria-label={
+          theme === "space"
+            ? "우주 외계인 마을 짓기 자동 시연"
+            : theme === "sea"
+              ? "바다 왕국 짓기 자동 시연"
+              : "우체국 짓기 자동 시연"
+        }
       >
-        <BuildPreview layout={layout} />
+        <BuildPreview key={theme} layout={layout} theme={theme} />
       </section>
+      <nav className="px-8 py-6" aria-label="시안 테마">
+        {(Object.keys(THEMES) as GardenThemeKey[])
+          .filter((key) => key !== theme)
+          .map((key) => (
+            <Link
+              key={key}
+              className="mr-6 underline underline-offset-4"
+              href={{
+                pathname: "/design/garden",
+                query: { layout, theme: key },
+              }}
+            >
+              {THEMES[key].title} 시안 보기
+            </Link>
+          ))}
+      </nav>
     </main>
   );
 }

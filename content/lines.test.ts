@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lines } from "./lines";
+import { lines, pickLine } from "./lines";
 
 // Word starts that scold, hurry, compare, or talk about body/weight (spec §12).
 const BANNED = [
@@ -37,4 +37,15 @@ describe("content/lines", () => {
         ),
       ));
   }
+});
+
+describe("pickLine", () => {
+  it("picks stage cheers for the chosen theme and shares the rest", () => {
+    expect(pickLine("nyamnyam", "stage3").id).toBe("stage-3");
+    expect(pickLine("nyamnyam", "stage3", 0, "sea").id).toBe("sea-stage-3");
+    expect(pickLine("nyamnyam", "complete", 0, "space").id).toBe(
+      "space-complete",
+    );
+    expect(pickLine("nyamnyam", "hello", 0, "space").id).toBe("hello");
+  });
 });

@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { motion, type MotionValue } from "motion/react";
 import "./garden.css";
-import { pieces } from "./WorldPieces";
+import { THEMES, type GardenThemeKey } from "./themes";
 import { Chick, POSE_LABELS, type ChickPose } from "./Chick";
 import { visiblePieces } from "./growth";
 
@@ -11,6 +11,7 @@ export { CHICK_POSES } from "./Chick";
 export type { ChickPose } from "./Chick";
 
 export interface GardenSceneProps {
+  theme?: GardenThemeKey;
   progress: number;
   layout: "wide" | "tall";
   bubble: string | null;
@@ -20,24 +21,8 @@ export interface GardenSceneProps {
   mouth?: MotionValue<number>;
 }
 
-function PostOfficeGround() {
-  return (
-    <g strokeLinejoin="round" strokeLinecap="round">
-      <ellipse
-        cx="275"
-        cy="459"
-        rx="230"
-        ry="31"
-        fill="#258e3d"
-        opacity=".18"
-      />
-      <ellipse cx="279" cy="433" rx="157" ry="45" fill="#a5e56a" />
-      <ellipse cx="279" cy="433" rx="133" ry="29" fill="#f6d78a" />
-    </g>
-  );
-}
-
 export function GardenScene({
+  theme = "post",
   progress,
   layout,
   bubble,
@@ -47,7 +32,9 @@ export function GardenScene({
 }: GardenSceneProps) {
   const tall = layout === "tall";
   const titleId = useId();
-  const visible = visiblePieces(progress);
+  const selected = THEMES[theme];
+  const { Background, Scenery } = selected;
+  const visible = visiblePieces(progress, selected.events);
   const latest = visible.at(-1);
   const target = latest?.[layout];
   const chickX = tall ? 145 : 250;
@@ -80,17 +67,7 @@ export function GardenScene({
         preserveAspectRatio="none"
         aria-hidden="true"
       >
-        <path
-          d={
-            tall
-              ? "M0 365Q230 305 500 350T1000 340V700H0Z"
-              : "M0 465Q170 373 367 458T711 447T1000 398V700H0Z"
-          }
-          fill="#9ce66a"
-        />
-        <path d="M0 529Q235 460 444 510T1000 479V700H0Z" fill="#7bd64f" />
-        <path d="M0 620Q245 503 524 590T1000 563V700H0Z" fill="#60ca43" />
-        <path d="M0 694Q260 583 497 636T1000 626V700H0Z" fill="#4dbd40" />
+        <Background tall={tall} />
       </svg>
       <svg
         className="relative size-full"
@@ -100,49 +77,11 @@ export function GardenScene({
       >
         <title
           id={titleId}
-        >{`냠냠이와 바람 우체국. ${POSE_LABELS[pose]} 길, 우체국, 망원경, 돛배가 하나씩 생겨요.`}</title>
-        <g
-          transform={
-            tall ? "translate(421 85) scale(.85)" : "translate(160 130)"
-          }
-          fill="#ffce25"
-          stroke="#ffce25"
-          strokeWidth="8"
-          strokeLinecap="round"
-        >
-          <path d="M0-66v-13M47-47l10-10M66 0h13M47 47l10 10M0 66v13M-47 47l-10 10M-66 0h-13M-47-47l-10-10" />
-          <circle r="48" stroke="none" />
-        </g>
-        <g fill="white">
-          <path
-            transform={
-              tall ? "translate(60 285) scale(1.15)" : "translate(292 120)"
-            }
-            d="M0 25Q-8 2 18 0Q22-35 51-23Q75-38 89-10Q122-13 124 13Q142 36 114 39H18Q0 39 0 25Z"
-          />
-          <path
-            transform={
-              tall
-                ? "translate(122 107) scale(.9)"
-                : "translate(850 110) scale(.7)"
-            }
-            d="M0 25Q-8 2 18 0Q22-35 51-23Q75-38 89-10Q122-13 124 13Q142 36 114 39H18Q0 39 0 25Z"
-          />
-        </g>
-        <g
-          transform={
-            tall ? "translate(14 196) scale(.86)" : "translate(415 94)"
-          }
-        >
-          <PostOfficeGround />
-        </g>
+        >{`냠냠이와 ${selected.title}. ${POSE_LABELS[pose]} ${selected.description}`}</title>
+        <Scenery tall={tall} />
         <g strokeLinejoin="round" strokeLinecap="round">
           {visible
-            .toSorted(
-              (a, b) =>
-                Number(b.key.startsWith("tree-")) -
-                Number(a.key.startsWith("tree-")),
-            )
+            .toSorted((a, b) => (a.layer ?? 0) - (b.layer ?? 0))
             .map((piece) => {
               const [x, y] = piece[layout];
               return (
@@ -154,7 +93,7 @@ export function GardenScene({
                   <g
                     className={piece === latest ? "garden-arrival" : undefined}
                   >
-                    {pieces[piece.key]}
+                    {selected.pieces[piece.key]}
                   </g>
                   <g
                     className={`garden-sparkles ${piece === latest ? "garden-highlight" : ""}`}

@@ -11,6 +11,7 @@ import {
 } from "react";
 import { Chick } from "@/components/garden/Chick";
 import { GardenScene, type ChickPose } from "@/components/garden/GardenScene";
+import { THEMES, type GardenThemeKey } from "@/components/garden/themes";
 import { visiblePieces } from "@/components/garden/growth";
 import { pickLine, type CharacterId, type LineKey } from "@/content/lines";
 import { sfx, unlockAudio } from "@/lib/audio/sfx";
@@ -57,7 +58,8 @@ const reduce = (s: MealState, a: Action) =>
 
 export function PlayScreen() {
   const [source] = useState(createWeightSource);
-  const [started, setStarted] = useState(false);
+  const [theme, setTheme] = useState<GardenThemeKey | null>(null);
+  const started = theme !== null;
   const [greeted, setGreeted] = useState(false);
   const [reading, setReading] = useState<WeightReading | null>(null);
   const [meal, dispatch] = useReducer(reduce, initialMealState);
@@ -103,11 +105,11 @@ export function PlayScreen() {
 
   const say = useCallback(
     (key: LineKey) => {
-      const line = pickLine(CHARACTER, key, turn.current++);
+      const line = pickLine(CHARACTER, key, turn.current++, theme ?? "post");
       setBubble(line.text);
       return speak(CHARACTER, line, mouth);
     },
-    [mouth],
+    [mouth, theme],
   );
 
   useEffect(() => {
@@ -198,10 +200,10 @@ export function PlayScreen() {
     return () => clearInterval(id);
   }, [eating, meal.lifted, say]);
 
-  const start = () => {
+  const start = (chosen: GardenThemeKey) => {
     unlockAudio();
     sfx.tap();
-    setStarted(true);
+    setTheme(chosen);
     // Speaking inside the tap also unlocks speech on iOS.
     void say("hello").then(() => setGreeted(true));
   };
@@ -235,6 +237,7 @@ export function PlayScreen() {
     <MotionConfig reducedMotion="user">
       <main className="relative h-dvh select-none overflow-hidden bg-[#91dfff] font-kid text-[#244c50]">
         <GardenScene
+          theme={theme ?? "post"}
           progress={sceneProgress}
           layout={portrait ? "tall" : "wide"}
           pose={pose}
@@ -286,24 +289,47 @@ export function PlayScreen() {
 
         {!started && (
           <div className="fixed inset-0 z-50 grid place-items-center bg-[#d4f3ff] p-6">
-            <div className="flex flex-col items-center gap-6 text-center">
+            <div className="flex max-h-full w-full flex-col items-center gap-[clamp(0.5rem,2.5vmin,1.5rem)] overflow-y-auto text-center">
               <h1 className="text-[clamp(2.5rem,9vmin,4.5rem)] text-[#006b86]">
                 냠냠캔버스
               </h1>
               <svg
                 viewBox="-130 -240 260 270"
                 aria-hidden="true"
-                className="size-[clamp(9rem,32vmin,15rem)]"
+                className="size-[clamp(6rem,20vmin,11rem)]"
               >
                 <Chick pose="hello" />
               </svg>
-              <button
-                type="button"
-                onClick={start}
-                className="min-h-16 rounded-full bg-[#006b86] px-12 text-[clamp(1.6rem,5vmin,2.2rem)] text-white shadow-lg active:translate-y-px"
-              >
-                시작하기
-              </button>
+              <p className="text-[clamp(1.4rem,4.5vmin,2rem)]">
+                오늘은 어디로 놀러 갈까?
+              </p>
+              {/* One tap picks the world and starts the meal. */}
+              <div className="flex w-full flex-wrap justify-center gap-4 portrait:flex-col portrait:items-center">
+                {(Object.keys(THEMES) as GardenThemeKey[]).map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => start(key)}
+                    className="flex w-[clamp(11rem,26vw,17rem)] flex-col overflow-hidden rounded-3xl border-4 border-white bg-white shadow-lg active:translate-y-px portrait:w-[min(80vw,20rem)] portrait:flex-row portrait:items-center"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="relative block aspect-[4/3] w-full portrait:w-1/2"
+                    >
+                      <GardenScene
+                        theme={key}
+                        progress={1}
+                        layout="wide"
+                        pose="hello"
+                        bubble={null}
+                      />
+                    </span>
+                    <span className="px-3 py-2 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-[#006b86] portrait:flex-1">
+                      {THEMES[key].title}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

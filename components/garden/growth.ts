@@ -1,4 +1,12 @@
-﻿export const GROWTH_PIECES = [
+export interface GrowthPiece {
+  key: string;
+  at: number;
+  wide: readonly [number, number];
+  tall: readonly [number, number];
+  layer?: number;
+}
+
+export const GROWTH_PIECES = [
   { key: "path-1", at: 0.03, wide: [490, 577], tall: [27, 611] },
   { key: "flowers-left", at: 0.06, wide: [75, 655], tall: [55, 930] },
   { key: "flying-letter", at: 0.09, wide: [475, 132], tall: [182, 75] },
@@ -8,7 +16,7 @@
   { key: "fence-left", at: 0.21, wide: [85, 540], tall: [59, 553] },
   { key: "path-2", at: 0.24, wide: [537, 557], tall: [76, 594] },
   { key: "path-4", at: 0.27, wide: [631, 517], tall: [174, 560] },
-  { key: "tree-left", at: 0.3, wide: [65, 470], tall: [55, 540] },
+  { layer: -1, key: "tree-left", at: 0.3, wide: [65, 470], tall: [55, 540] },
   { key: "house", at: 0.33, wide: [747, 394], tall: [300, 454] },
   { key: "letter-sign", at: 0.36, wide: [705, 337], tall: [263, 405] },
   { key: "pond", at: 0.39, wide: [805, 625], tall: [409, 916] },
@@ -17,7 +25,13 @@
   { key: "fence-right", at: 0.48, wide: [921, 565], tall: [449, 562] },
   { key: "pinwheel", at: 0.51, wide: [400, 676], tall: [280, 966] },
   { key: "round-window", at: 0.54, wide: [747, 271], tall: [300, 348] },
-  { key: "tree-right", at: 0.57, wide: [947, 490], tall: [461, 549] },
+  {
+    layer: -1,
+    key: "tree-right",
+    at: 0.57,
+    wide: [947, 490],
+    tall: [461, 549],
+  },
   { key: "letter-chute", at: 0.6, wide: [841, 369], tall: [380, 433] },
   { key: "garland", at: 0.63, wide: [747, 296], tall: [300, 370] },
   { key: "butterfly", at: 0.66, wide: [485, 615], tall: [344, 623] },
@@ -37,14 +51,21 @@
 
 export type GrowthPieceKey = (typeof GROWTH_PIECES)[number]["key"];
 
-export function visiblePieces(progress: number) {
+export function visiblePieces(
+  progress: number,
+  events: readonly GrowthPiece[] = GROWTH_PIECES,
+) {
   const safeProgress = Number.isNaN(progress)
     ? 0
     : Math.max(0, Math.min(1, progress));
-  return GROWTH_PIECES.filter((piece) => piece.at <= safeProgress);
+  return events.filter((piece) => piece.at <= safeProgress);
 }
 
-export function buildProgress(elapsedMs: number) {
+export function buildProgress(
+  elapsedMs: number,
+  events?: readonly GrowthPiece[],
+) {
   // Hold the completed world for a second before the preview alone restarts.
-  return Math.min(1, (Math.max(0, elapsedMs) % 21000) / 20000);
+  const progress = Math.min(1, (Math.max(0, elapsedMs) % 21000) / 20000);
+  return events ? (visiblePieces(progress, events).at(-1)?.at ?? 0) : progress;
 }

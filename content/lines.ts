@@ -3,6 +3,8 @@
 // or anything about body or weight. Keep each line short (~25 chars) with no variables.
 // `tip` is the intonation hint for the Clova Dubbing script (docs/VOICE_SCRIPT.md).
 
+import type { GardenThemeKey } from "@/components/garden/themes";
+
 export type Line = { id: string; text: string; tip?: string };
 
 export type LineKey =
@@ -24,7 +26,12 @@ export type LineKey =
   | "idle"
   | "touch";
 
-export type CharacterLines = Record<LineKey, Line[]>;
+// Stage cheers name what just appeared, so they differ per theme. The plain keys are the
+// post office (default theme); other themes use "<theme>:<key>".
+type ThemedKey = Extract<LineKey, `stage${number}` | "complete">;
+type ThemedLineKey = `${Exclude<GardenThemeKey, "post">}:${ThemedKey}`;
+
+export type CharacterLines = Record<LineKey | ThemedLineKey, Line[]>;
 
 // 냠냠이 (chick): bright and cute, short exclamations.
 const nyamnyam: CharacterLines = {
@@ -50,6 +57,68 @@ const nyamnyam: CharacterLines = {
   stage6: [{ id: "stage-6", text: "돛배가 둥둥 떠 있어~", tip: "끝을 길게" }],
   stage7: [{ id: "stage-7", text: "꽃이 활짝 피었어!", tip: "아주 기쁘게" }],
   complete: [{ id: "complete", text: "와아! 우체국이 완성됐어!", tip: "환호" }],
+  // Sea kingdom: stage k lands at meal 10/25/40/55/70/85/95%, scene 10.5/26/42/58/74/89/100%.
+  "sea:stage1": [
+    {
+      id: "sea-stage-1",
+      text: "보글보글 물방울이 생겼어!",
+      tip: "'보글보글' 리듬감",
+    },
+  ],
+  "sea:stage2": [
+    { id: "sea-stage-2", text: "물고기 친구들이 왔어!", tip: "신나게" },
+  ],
+  "sea:stage3": [
+    { id: "sea-stage-3", text: "조개 궁전이 생겼어!", tip: "놀라며" },
+  ],
+  "sea:stage4": [
+    { id: "sea-stage-4", text: "거북이가 헤엄쳐 왔어~", tip: "끝을 길게" },
+  ],
+  "sea:stage5": [
+    { id: "sea-stage-5", text: "반짝반짝 보물상자다!", tip: "뿌듯하게" },
+  ],
+  "sea:stage6": [
+    { id: "sea-stage-6", text: "해마가 놀러 왔어!", tip: "신나게" },
+  ],
+  "sea:stage7": [
+    { id: "sea-stage-7", text: "고래가 인사하러 왔어!", tip: "아주 기쁘게" },
+  ],
+  "sea:complete": [
+    { id: "sea-complete", text: "와아! 바다 왕국 완성이야!", tip: "환호" },
+  ],
+  // Space village: same scene thresholds as above.
+  "space:stage1": [
+    {
+      id: "space-stage-1",
+      text: "반짝반짝 별이 떴어!",
+      tip: "'반짝반짝' 리듬감",
+    },
+  ],
+  "space:stage2": [
+    { id: "space-stage-2", text: "혜성이 슝 날아가!", tip: "'슝' 강조" },
+  ],
+  "space:stage3": [
+    { id: "space-stage-3", text: "우리 기지가 생겼어!", tip: "놀라며" },
+  ],
+  "space:stage4": [
+    { id: "space-stage-4", text: "로켓이 다 만들어졌어!", tip: "뿌듯하게" },
+  ],
+  "space:stage5": [
+    { id: "space-stage-5", text: "우주인 친구가 왔어!", tip: "신나게" },
+  ],
+  "space:stage6": [
+    {
+      id: "space-stage-6",
+      text: "월면차가 부릉부릉!",
+      tip: "'부릉부릉' 리듬감",
+    },
+  ],
+  "space:stage7": [
+    { id: "space-stage-7", text: "로켓에 불이 켜졌어!", tip: "아주 기쁘게" },
+  ],
+  "space:complete": [
+    { id: "space-complete", text: "와아! 우주 마을 완성이야!", tip: "환호" },
+  ],
   full: [{ id: "full", text: "배부르구나! 잘 먹었어!", tip: "다정하게" }],
   fullStamp: [
     { id: "full-stamp", text: "오늘 도장 쾅! 최고야!", tip: "'쾅' 강조" },
@@ -70,8 +139,18 @@ const nyamnyam: CharacterLines = {
 export const lines = { nyamnyam } satisfies Record<string, CharacterLines>;
 export type CharacterId = keyof typeof lines;
 
+const isThemed = (key: LineKey): key is ThemedKey =>
+  key === "complete" || key.startsWith("stage");
+
 // Rotates through variants so repeated prompts don't sound identical.
-export function pickLine(character: CharacterId, key: LineKey, turn = 0): Line {
-  const options = lines[character][key];
+export function pickLine(
+  character: CharacterId,
+  key: LineKey,
+  turn = 0,
+  theme: GardenThemeKey = "post",
+): Line {
+  const byKey = lines[character];
+  const options =
+    theme !== "post" && isThemed(key) ? byKey[`${theme}:${key}`] : byKey[key];
   return options[turn % options.length];
 }

@@ -22,7 +22,7 @@ test("play screen fits the device at stage 5", async ({ page }) => {
     delete window.speechSynthesis;
   });
   await page.goto("/play");
-  await page.getByRole("button", { name: "시작하기" }).click();
+  await page.getByRole("button", { name: "바람 우체국" }).click();
 
   const debug = page.locator("p.font-mono");
   await expect(debug).toContainText("식판 350g", { timeout: 15_000 });
