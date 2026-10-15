@@ -293,13 +293,15 @@ export function PlayScreen() {
               <h1 className="text-[clamp(2.5rem,9vmin,4.5rem)] text-[#006b86]">
                 냠냠캔버스
               </h1>
-              <svg
-                viewBox="-130 -240 260 270"
-                aria-hidden="true"
-                className="size-[clamp(6rem,20vmin,11rem)]"
-              >
-                <Chick pose="hello" />
-              </svg>
+              <span className="start-chick block size-[clamp(6rem,20vmin,11rem)]">
+                <svg
+                  viewBox="-130 -240 260 270"
+                  aria-hidden="true"
+                  className="size-full"
+                >
+                  <Chick pose="hello" />
+                </svg>
+              </span>
               <p className="text-[clamp(1.4rem,4.5vmin,2rem)]">
                 오늘은 어디로 놀러 갈까?
               </p>
@@ -314,7 +316,7 @@ export function PlayScreen() {
                   >
                     <span
                       aria-hidden="true"
-                      className="relative block aspect-[4/3] w-full portrait:w-1/2"
+                      className="theme-card-scene relative block aspect-[4/3] w-full portrait:w-1/2"
                     >
                       <GardenScene
                         theme={key}

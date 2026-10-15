@@ -169,7 +169,6 @@ export function Chick({
                 rx="49"
                 ry="48"
                 fill="#ffc914"
-                vectorEffect="non-scaling-stroke"
               />
             </g>
             <Wing side={-1} wing={left} />

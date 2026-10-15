@@ -154,6 +154,19 @@
   transform-origin: 0 0;
   transition: transform 560ms cubic-bezier(0.34, 1.4, 0.64, 1);
 }
+/* Wings keep a screen-space outline so stretching them never thickens it. In
+   the small start-screen previews that fixed width outweighs the scaled-down
+   body, so use the scaled width there (3.5 user units x render scale). */
+.start-chick,
+.theme-card-scene {
+  container-type: inline-size;
+}
+.start-chick [vector-effect="non-scaling-stroke"] {
+  stroke-width: calc(100cqw * 3.5 / 270);
+}
+.theme-card-scene [vector-effect="non-scaling-stroke"] {
+  stroke-width: calc(100cqw * 3.5 * 1.13 / 1000);
+}
 .chick-breathe,
 .chick-hop,
 .chick-sway {
