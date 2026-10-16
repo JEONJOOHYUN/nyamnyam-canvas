@@ -2,7 +2,31 @@ import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CHICK_POSES, GardenScene } from "./GardenScene";
-import { GROWTH_PIECES, buildProgress, visiblePieces } from "./growth";
+import {
+  GROWTH_PIECES,
+  arrivingPieces,
+  buildProgress,
+  visiblePieces,
+} from "./growth";
+
+describe("arrivingPieces", () => {
+  const keysAt = (p: number) => visiblePieces(p).map((piece) => piece.key);
+
+  it("brings in every piece a big jump adds, together", () => {
+    const added = arrivingPieces(keysAt(0.1), keysAt(0.4));
+    expect(added).toEqual(keysAt(0.4).slice(keysAt(0.1).length));
+    expect(added.length).toBe(10);
+  });
+
+  it("brings in one piece for a small step", () => {
+    expect(arrivingPieces(keysAt(0.1), keysAt(0.13))).toHaveLength(1);
+  });
+
+  it("animates only the newest piece on the first render", () => {
+    expect(arrivingPieces(null, keysAt(0.4))).toEqual(keysAt(0.4).slice(-1));
+    expect(arrivingPieces(null, [])).toEqual([]);
+  });
+});
 
 describe("additive scene growth", () => {
   it("has 30–40 distinct events with no gap over four percent, including both ends", () => {

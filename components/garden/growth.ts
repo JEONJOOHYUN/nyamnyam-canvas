@@ -61,6 +61,18 @@ export function visiblePieces(
   return events.filter((piece) => piece.at <= safeProgress);
 }
 
+// Pieces that play the arrival animation when the visible set changes: every piece new since
+// the last render, so one big bite brings all of its pieces in together. With no previous set
+// (first render, or another theme) only the newest one arrives.
+export function arrivingPieces(
+  before: readonly string[] | null,
+  now: readonly string[],
+): string[] {
+  if (before === null) return now.slice(-1);
+  const seen = new Set(before);
+  return now.filter((key) => !seen.has(key));
+}
+
 export function buildProgress(
   elapsedMs: number,
   events?: readonly GrowthPiece[],

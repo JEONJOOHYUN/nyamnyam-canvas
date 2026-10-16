@@ -6,7 +6,7 @@ import "./garden.css";
 import { THEMES, type GardenThemeKey } from "./themes";
 import { POSE_LABELS, type ChickPose } from "./Chick";
 import { CHARACTERS, type GardenCharacterKey } from "./characters";
-import { visiblePieces } from "./growth";
+import { arrivingPieces, visiblePieces } from "./growth";
 
 export { CHICK_POSES } from "./Chick";
 export type { ChickPose } from "./Chick";
@@ -41,6 +41,26 @@ export function GardenScene({
   const visible = visiblePieces(progress, selected.events);
   const latest = visible.at(-1);
   const target = latest?.[layout];
+  // Which pieces arrived with the last change (adjusting state during render, no effect).
+  const keys = visible.map((piece) => piece.key);
+  const shown = `${theme}:${keys.join(",")}`;
+  const [arrival, setArrival] = useState(() => ({
+    shown,
+    theme,
+    keys,
+    arriving: arrivingPieces(null, keys),
+  }));
+  if (arrival.shown !== shown)
+    setArrival({
+      shown,
+      theme,
+      keys,
+      arriving: arrivingPieces(
+        arrival.theme === theme ? arrival.keys : null,
+        keys,
+      ),
+    });
+  const arriving = new Set(arrival.arriving);
   const chickX = tall ? 145 : 250;
   const chickEyeY = tall ? 680 : 404;
   const scene = useRef<HTMLDivElement>(null);
@@ -95,12 +115,14 @@ export function GardenScene({
                   transform={`translate(${x} ${y}) scale(${tall ? 0.86 : 1})`}
                 >
                   <g
-                    className={piece === latest ? "garden-arrival" : undefined}
+                    className={
+                      arriving.has(piece.key) ? "garden-arrival" : undefined
+                    }
                   >
                     {selected.pieces[piece.key]}
                   </g>
                   <g
-                    className={`garden-sparkles ${piece === latest ? "garden-highlight" : ""}`}
+                    className={`garden-sparkles ${arriving.has(piece.key) ? "garden-highlight" : ""}`}
                     fill="#fff3ac"
                     stroke="#edb94b"
                     strokeWidth="2"
