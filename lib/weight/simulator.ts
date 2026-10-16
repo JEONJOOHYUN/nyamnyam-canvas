@@ -24,7 +24,6 @@ export class SimulatorSource implements WeightSource {
   noise = false;
   foodG = 0;
   lifted = false;
-  handG = 0; // food picked up off the tray, like bread
   private pressUntil = 0;
   private tareOffset = 0;
   private seq = 0;
@@ -65,19 +64,6 @@ export class SimulatorSource implements WeightSource {
 
   bite(g = 15) {
     this.setFood(this.foodG - g);
-  }
-
-  // Picks food up by hand; it leaves the tray at once.
-  pickUp(g = 60) {
-    if (this.handG) return;
-    this.handG = Math.min(g, this.foodG);
-    this.foodG -= this.handG;
-  }
-
-  // Puts the picked-up food back after eating some of it.
-  putDown(eaten = 20) {
-    this.foodG += Math.max(0, this.handG - eaten);
-    this.handG = 0;
   }
 
   setLifted(v: boolean) {

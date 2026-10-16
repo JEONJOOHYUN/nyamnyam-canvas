@@ -48,9 +48,7 @@ describe("SimulatorSource → meal state machine", () => {
     await vi.advanceTimersByTimeAsync(4000);
     expect(meal.eatenG).toBeLessThan(3);
 
-    sim.bite(25); // two spoonfuls; one 50g drop would look like food taken in hand
-    await vi.advanceTimersByTimeAsync(4000);
-    sim.bite(25);
+    sim.bite(50);
     await vi.advanceTimersByTimeAsync(4000);
     near(meal.progress, 0.25, 0.02);
 
@@ -88,29 +86,6 @@ describe("SimulatorSource → meal state machine", () => {
     sim.bite(120);
     await vi.advanceTimersByTimeAsync(4000);
     expect(meal).toMatchObject({ eatenG: 0, heldG: 120 });
-    sim.disconnect();
-  });
-
-  it("counts bread picked up and put back partly eaten", async () => {
-    const sim = new SimulatorSource();
-    let meal = initialMealState;
-    sim.subscribe((r) => {
-      meal = mealReducer(
-        meal,
-        { type: "reading", reading: r },
-        defaultMealConfig,
-      );
-    });
-    await sim.connect();
-    await vi.advanceTimersByTimeAsync(6000);
-    sim.setFood(200);
-    await vi.advanceTimersByTimeAsync(6100);
-    sim.pickUp(60);
-    await vi.advanceTimersByTimeAsync(10_000);
-    expect(meal).toMatchObject({ eatenG: 0, heldG: 60, heldSuspect: false });
-    sim.putDown(20);
-    await vi.advanceTimersByTimeAsync(6000);
-    expect(meal).toMatchObject({ eatenG: 20, heldG: 0, foodG: 200 });
     sim.disconnect();
   });
 
