@@ -21,4 +21,6 @@ export interface WeightSource {
   subscribe(cb: (r: WeightReading) => void): () => void;
   sendCommand(cmd: DeviceCommand): Promise<void>;
   readonly status: WeightSourceStatus;
+  // Called whenever status changes (for useSyncExternalStore).
+  onStatus(cb: () => void): () => void;
 }

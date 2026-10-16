@@ -31,19 +31,32 @@ export class SimulatorSource implements WeightSource {
   private lastSent: LastSent = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private listeners = new Set<(r: WeightReading) => void>();
+  private statusListeners = new Set<() => void>();
 
   constructor(private random: () => number = Math.random) {}
 
   async connect() {
     if (this.timer) return;
-    this.status = "online";
+    this.setStatus("online");
     this.timer = setInterval(() => this.sample(), 1000 / SAMPLE_HZ);
   }
 
   disconnect() {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
-    this.status = "idle";
+    this.setStatus("idle");
+  }
+
+  onStatus(cb: () => void) {
+    this.statusListeners.add(cb);
+    return () => {
+      this.statusListeners.delete(cb);
+    };
+  }
+
+  private setStatus(s: WeightSourceStatus) {
+    this.status = s;
+    this.statusListeners.forEach((cb) => cb());
   }
 
   subscribe(cb: (r: WeightReading) => void) {

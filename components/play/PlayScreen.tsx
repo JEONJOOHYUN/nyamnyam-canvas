@@ -44,9 +44,15 @@ import {
 import { DEFAULT_SETTINGS, type PlaySettings } from "@/lib/parent/settings";
 import { getSupabase } from "@/lib/supabase/client";
 import type { ChildRow } from "@/lib/supabase/types";
-import { createWeightSource } from "@/lib/weight";
+import {
+  choiceKey,
+  createWeightSource,
+  offlineChoice,
+  resolveWeightChoice,
+  type WeightChoice,
+} from "@/lib/weight";
 import { SimulatorSource } from "@/lib/weight/simulator";
-import type { WeightReading } from "@/lib/weight/types";
+import type { WeightReading, WeightSource } from "@/lib/weight/types";
 import { Confetti, Stamp } from "./Celebration";
 import { SimulatorPanel } from "./SimulatorPanel";
 import { StartScreen } from "./StartScreen";
@@ -85,8 +91,40 @@ const baselineStage = ({ settings, carry }: Config) =>
     settings.stageThresholds,
   );
 
+const statusText = (source: WeightSource) =>
+  source instanceof SimulatorSource
+    ? "시뮬레이터"
+    : source.status === "online"
+      ? "저울 연결됨"
+      : source.status === "connecting"
+        ? "저울 찾는 중…"
+        : "저울을 기다리고 있어요";
+
 export function PlayScreen() {
-  const [source] = useState(createWeightSource);
+  // The simulator stands in (same on server and client) until this device's pick is
+  // known: from the parent's account once loaded, or at the start tap without Supabase.
+  const [weight, setWeight] = useState(() => ({
+    key: "simulator",
+    source: createWeightSource({ kind: "simulator" }, null),
+  }));
+  const source = weight.source;
+  const applyWeight = useCallback((choice: WeightChoice) => {
+    const key = choiceKey(choice);
+    setWeight((w) =>
+      w.key === key
+        ? w
+        : { key, source: createWeightSource(choice, getSupabase()) },
+    );
+  }, []);
+  const subscribeStatus = useCallback(
+    (cb: () => void) => source.onStatus(cb),
+    [source],
+  );
+  const statusLabel = useSyncExternalStore(
+    subscribeStatus,
+    () => statusText(source),
+    () => statusText(source),
+  );
   // Demo defaults until (and unless) a signed-in parent's child settings load.
   const [config, setConfig] = useState<Config>(DEMO);
   const { settings, carry } = config;
@@ -172,7 +210,7 @@ export function PlayScreen() {
       const { data } = await db.auth.getSession();
       const uid = data.session?.user.id ?? null;
       userId.current = uid;
-      if (!uid) return loadPlayConfig(db);
+      if (!uid) return { config: null, weight: offlineChoice() };
       const pending = loadUnsaved(uid);
       const results = await Promise.allSettled(
         pending.map((r) => saveMeal(db, r)),
@@ -180,12 +218,17 @@ export function PlayScreen() {
       const left = pending.filter((_, i) => results[i].status === "rejected");
       storeUnsaved(uid, left);
       if (left.length) throw new Error(`${left.length} meal(s) still unsaved`);
-      return loadPlayConfig(db);
+      const [config, weight] = await Promise.all([
+        loadPlayConfig(db),
+        resolveWeightChoice(db),
+      ]);
+      return { config, weight };
     };
     flushThenLoad()
       .then((loaded) => {
         if (!live) return;
-        restart(loaded ?? DEMO);
+        applyWeight(loaded.weight);
+        restart(loaded.config ?? DEMO);
         setUnsaved([]);
         setSaveFailed(false);
         setReady(true);
@@ -194,6 +237,7 @@ export function PlayScreen() {
         if (!live) return;
         console.warn("parent settings not loaded", e);
         // Never carry on with the previous child's settings; ask to retry or demo.
+        applyWeight(offlineChoice());
         restart(DEMO);
         setLoadFailed(true);
       });
@@ -205,7 +249,7 @@ export function PlayScreen() {
       setReady(false);
       setLoadFailed(false);
     };
-  }, [attempt]);
+  }, [attempt, applyWeight]);
 
   useEffect(() => {
     setSfxVolume(settings.sfxVolume);
@@ -425,6 +469,7 @@ export function PlayScreen() {
 
   const start = (chosen: GardenThemeKey) => {
     sfx.tap();
+    if (!getSupabase()) applyWeight(offlineChoice());
     setTheme(chosen);
   };
 
@@ -471,13 +516,6 @@ export function PlayScreen() {
     sfx.touch();
     void say("touch");
   };
-
-  const statusLabel =
-    source instanceof SimulatorSource
-      ? "시뮬레이터"
-      : source.status === "online"
-        ? "연결됨"
-        : "연결 중…";
 
   return (
     <MotionConfig reducedMotion="user">

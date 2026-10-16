@@ -1,0 +1,9 @@
+# Only what `supabase functions deploy` needs. The scale has no Supabase login, so the
+# device functions skip JWT checks and authenticate device_id + device_key themselves.
+project_id = "nyamnyam-canvas"
+
+[functions.device-ingest]
+verify_jwt = false
+
+[functions.device-commands]
+verify_jwt = false

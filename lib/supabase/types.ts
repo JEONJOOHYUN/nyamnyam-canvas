@@ -1,4 +1,4 @@
-// Hand-written types for supabase/migrations/0001_parent.sql (schema "nyamnyam").
+// Hand-written types for supabase/migrations/*.sql (schema "nyamnyam").
 // Keep in sync with the migrations; there is no codegen step.
 
 import type { GardenCharacterKey } from "@/components/garden/characters";
@@ -80,6 +80,45 @@ export type StampRow = {
   meal_id: string | null;
 };
 
+// supabase/migrations/0003_devices.sql
+export type DeviceRow = {
+  id: string;
+  parent_id: string;
+  device_key_hash: string;
+  name: string;
+  last_seen_at: string | null;
+  calibration_factor: number | null;
+  tare_offset: number | null;
+  created_at: string;
+};
+
+export type DeviceStateRow = {
+  device_id: string;
+  parent_id: string;
+  grams: number;
+  raw: number;
+  stable: boolean;
+  seq: number;
+  ts: number;
+  updated_at: string;
+};
+
+export type DeviceCommandRow = {
+  id: string;
+  device_id: string;
+  parent_id: string;
+  type: "tare" | "calibrate" | "reboot";
+  payload: { knownGrams?: number };
+  status: "pending" | "done" | "error";
+  result: {
+    error?: string;
+    calibrationFactor?: number;
+    tareOffset?: number;
+  } | null;
+  created_at: string;
+  done_at: string | null;
+};
+
 type Empty = Record<string, never>;
 
 export type Database = {
@@ -101,6 +140,12 @@ export type Database = {
       >;
       pictures: Table<PictureRow, "child_id" | "map" | "character">;
       stamps: Table<StampRow, "child_id">;
+      devices: Table<DeviceRow, "id" | "device_key_hash">;
+      device_state: Table<
+        DeviceStateRow,
+        "device_id" | "parent_id" | "grams" | "raw" | "stable" | "seq" | "ts"
+      >;
+      device_commands: Table<DeviceCommandRow, "device_id" | "type">;
     };
     Views: Empty;
     Functions: {

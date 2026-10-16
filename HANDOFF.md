@@ -12,6 +12,7 @@
 - 4단계(반응형 완성) 완료: 6개 기기 Playwright 레이아웃·스크린샷 테스트, 세로 화면 그림 확대.
 - 정원 재설계 완료(2026-10-15): `/play` 가 바람 우체국 장면(`components/garden/GardenScene`)으로 바뀜. 다음: 5단계 테마 확장, 클로바더빙(사용자 약관 확인 후).
 - 5단계(테마 확장) 완료(2026-10-15, `f9e3452`): 테마 3종(바람 우체국·바다 왕국·우주 외계인 마을), 캐릭터 3종(냠냠이·퐁당이 해달·반짝이 누나 별), "누구랑 먹을까 → 어디로 갈까" 시작 화면, 캐릭터·테마별 대사.
+- 7단계(기기 연동 준비) 커밋·dev push(2026-10-17, Codex 리뷰 6회 지적 16건 반영, 마지막 지적 없음 → 커밋·dev push). 자세한 건 "다음 할 일" 0번.
 - 6단계(부모 설정) 완료·커밋·dev push(2026-10-16, Codex 리뷰 7회): Supabase(메이플 프로젝트의 `nyamnyam` 스키마), `/parent`, `/play` 설정 연동·식사 기록 저장. 음성은 ElevenLabs 로 111개 생성, 별도 커밋·dev push. 자세한 건 "다음 할 일".
 
 ## 완료된 것
@@ -50,6 +51,11 @@
   - 참고 자료 확인 범위: 베베핀 스토어 스크린샷만(트레일러 X), 핑크퐁 홍보 영상 프레임만(음성 X), Sago Mini 홍보 영상 프레임만. 요청에 적힌 "첨부 이미지"는 메시지에 없었음.
 
 ## 다음 할 일 (우선순위 순)
+
+0. **7단계 기기 연동 준비 — 2026-10-17 커밋·dev push**. 남은 것: ② **사용자가 할 일**: Supabase SQL 편집기에서 `supabase/migrations/0003_devices.sql` 실행, `npx supabase login` 후 `npx supabase functions deploy device-ingest --project-ref dwxntehggzojbzbeydxm --no-verify-jwt`(device-commands 도) ③ 부품 도착 후 펌웨어 컴파일·실기기 확인(이 PC 에 Arduino IDE 없음, 컴파일 안 해 봄) — 순서는 `docs/FIRMWARE_NOTES.md` §7.
+   - 만든 것: DB `devices`/`device_state`(Realtime 발행)/`device_commands`(RLS·열 단위 권한: 부모는 등록·이름·삭제·명령 넣기만, 측정값·결과·보정값은 Edge Function 만), Edge Function `supabase/functions/{device-ingest,device-commands}`(공통 처리 `_shared/device.ts` 는 import 없는 순수 TS — Vitest 로 테스트, DB 는 `_shared/store.ts`, 둘 다 tsconfig 에서 index·store 제외, `supabase/config.toml` 로 JWT 검사 끔), 웹 `lib/weight/{remote,guard,supabase,localws}.ts`(공통 offline 감시·seq 검사·재부팅 이어 붙이기, Realtime 소스, 로컬 WebSocket 소스), `lib/weight/index.ts` 소스 선택(`effectiveChoice` 를 아이 화면과 부모 화면이 같이 씀, 기기별 localStorage `nyamnyam.weightSource`), `WeightSource.onStatus`(상태 바뀌면 화면 갱신), 부모 화면 "저울" 탭 `components/parent/DeviceTab.tsx`(이 화면이 쓸 저울 고르기, 등록 → secrets.h 세 줄 한 번만 표시, 삭제 두 번 누르기, 보정 마법사: 영점 → 아는 무게 보정 → 내렸다 다시 올려 ±5g), `lib/parent/devices.ts`(id·키·해시·보정 판정), 펌웨어 `firmware/nyamnyam/nyamnyam.ino`+`secrets.example.h`, FIRMWARE_NOTES §2·§3·§4·§6·§7 완성.
+   - 확인: lint·typecheck·test 145·e2e 12 통과. 가짜 Supabase REST + **가짜 Realtime 웹소켓**(Playwright `routeWebSocket`, Phoenix 메시지 흉내)으로 저울 탭·보정 마법사 전 과정·등록·선택·`/play` "저울 연결됨"까지 확인하는 스크립트 `C:/dev/_backup/nyamnyam-garden-v3/tools/parent-device.mjs <출력폴더>`(실제 DB·네트워크 접근 없음, 휴대폰·데스크톱 가로 넘침 0, 페이지 오류 0).
+   - Codex 리뷰로 바뀐 것: 부모 화면 표시와 실제 소스 규칙 일치, 로컬 소스는 시작 탭 때 적용(hydration 불일치 방지), 명령 결과는 온 길로만(서버/LOCAL_WS/시리얼), 인증서 검사 시 SNTP 먼저, 센서가 멈추면 전송 중단·재연결 시 버퍼 초기화, 첫 무게가 안 와도 3초 뒤 offline, 명령 만료는 만든 시각 기준 12초 하나로(서버 `expiresInMs` → 기기는 요청 보낸 시각부터 계산), 큐에 넣은 뒤에만 id 기억, 큐 8칸, 재시도 타이머 플래그(49일 넘김 대비), 보정 확인은 보정 뒤 새로 내렸다 올린 값만.
 
 1. **6단계 부모 설정 — 2026-10-16 커밋·dev push**. 남은 것: 사용자가 `/parent` 흐름을 직접 확인(아래 "이전 기록" 끝). 2026-10-16 11~16시 Codex 리뷰 6회(지적 23건 모두 반영) → 16:35 7번째 리뷰(음성 작업 포함) 지적 2건 반영: ① 완성 기준 경계의 부동소수점 오차(57% 기준에서 정확히 57/100 이 56.999…% 로 미완료) → `picture.ts` `reaches()` 가 1e-9 허용, B 모드 이번 식사 몫도 기준 도달 시 정확히 1 ② http LAN 접속(태블릿 → 개발 PC)에선 `crypto.subtle` 이 없어 PIN 설정·확인이 예외 → `settings.ts` `sha256()` 순수 JS 대체(같은 해시, 테스트로 crypto.subtle 과 비교). lint·typecheck·test 101·e2e 12 통과. 리뷰로 바뀐 것: 완성 방식 B·C 는 `carry.shown` 으로 그림이 줄지 않음, 완성 판정은 목표(끼 수·g) 달성 시(`stageProgress` 가 B·C 에서 picture 1 → 정확히 마지막 단계), 그림 `completed_at` = 식사 `ended_at`(같은 시계), 부모 설정 로딩 전엔 시작 불가("준비하고 있어요"), 실패 시 "다시 시도 / 기록 없이 시작", `/play` 를 떠날 때(cacheComponents 로 상태가 남음) 세션 초기화·돌아오면 새 설정으로 시작 화면부터, 식사·그림·도장은 DB 함수 `nyamnyam.save_meal`(`supabase/migrations/0002_save_meal.sql`, security invoker, 한 트랜잭션, insert-or-skip, 도장 날짜 = 식사 끝난 한국 날짜)로 저장하고 ID 는 기기에서 `newId()`(http LAN 접속 대비 getRandomValues 대체), 저장 전 기기에 계정별로 보관(`nyamnyam.unsavedMeals.<userId>`)→성공 시 삭제, 다음 방문 때 먼저 재전송 후 진행률 로드, 실패 시 "기록 N개 저장 안 됨 · 다시 저장", 부모 화면은 프로필·설정·기록 조회 실패를 빈 값과 구분(다시 시도), 인증이 바뀌면 늦게 온 프로필 조회 무시, 볼륨 슬라이더 손잡이 1개. 0002 는 Supabase SQL 편집기에서 실행 완료(익명 호출 거부 확인). lint·typecheck·test 92·e2e 12 통과.
    - (이전 기록) 2026-10-16 00시 코드 완료. Codex 리뷰가 사용량 한도(03:21 해제)로 3번 실패("Reviewer failed to output a response" → 세 번째 로그에 usage limit) → 규칙대로 **사용자에게 "리뷰 없이 지금 커밋 / 03:21 이후 리뷰 후 커밋" 을 물어본 상태**. 미커밋 파일 23개(`git status`): app/parent, components/parent, components/ui 9개(alert badge card input label radio-group slider switch tabs — select·separator 는 안 써서 지움), lib/{meal/picture*,parent,supabase}, supabase/migrations, PlayScreen·StartScreen·SPEC(§11 8단계 애니메이션)·.env.example·package*.json·HANDOFF. 남은 확인: 사용자가 `/parent` 에서 가입(확인 메일) → PIN → 아이 추가 → 설정 저장 → `/play` 식사 → 기록이 보이는지(Claude 는 외부 서비스 계정 생성 불가라 로그인 흐름을 직접 못 봄).
@@ -90,11 +96,16 @@ npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 
 | 이름                            | 용도                                                   |
 | ------------------------------- | ------------------------------------------------------ |
-| `NEXT_PUBLIC_WEIGHT_SOURCE`     | 무게 데이터 소스: `simulator` / `supabase` / `localws` |
+| `NEXT_PUBLIC_WEIGHT_SOURCE`     | 기본 무게 소스: `simulator` / `supabase`(로그인한 부모의 첫 저울) / `localws` — 부모 화면 저울 탭에서 기기별로 바꿀 수 있음 |
+| `NEXT_PUBLIC_LOCAL_WS_URL`      | `localws` 기본 주소(예: `ws://192.168.0.23:81`, http 페이지에서만) |
 | `NEXT_PUBLIC_SUPABASE_URL`      | Supabase 프로젝트 URL (6단계부터)                      |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase 공개 키 (RLS로 보호)                          |
 
 ## 주요 설계 결정과 이유
+
+- **기기 재부팅 처리** (2026-10-17): 펌웨어는 부팅마다 seq 1·millis() 부터(부팅 카운터·NTP 없음). 웹 `lib/weight/guard.ts` 가 2초 이상 조용한 뒤 작은 seq 를 재부팅으로 받아들이고 ts 를 이어 붙인다 → 식사 상태 머신은 시간이 뒤로 가는 걸 보지 않는다. 펌웨어를 단순하게 두고 판단은 웹에서.
+- **명령은 무게 전송 응답으로 받는다** (2026-10-17): `device-ingest` 응답에 대기 명령을 실어 보내서 따로 1초 polling 하지 않는다(무게를 최소 1초마다 보내므로 같은 효과, 요청 수 절반). `device-commands` 는 결과 보고 + 무게를 안 보낼 때의 polling.
+- **ESP32 는 anon key 없이 Edge Function 만** (SPEC §7): 기기 키는 등록 때 한 번만 보여 주고 DB 에는 SHA-256 만. Edge Function 은 service role 로 쓰고, 부모는 RLS·열 단위 권한으로 측정값·명령 결과를 바꿀 수 없다.
 
 - **한 번에 많이 먹으면 부품이 함께 등장** (2026-10-16 사용자 결정 "기본은 순서대로, 여러 개가 나와야 할 땐 목표만큼 다같이"): 진행률이 조금씩 오르면 부품이 하나씩, 크게 뛰면 그만큼의 부품이 모두 함께 내려앉기·반짝임 애니메이션을 받는다(`growth.ts` `arrivingPieces`, 예전엔 마지막 하나만 애니메이션). 처음 그릴 때·테마가 바뀔 때는 가장 최근 부품 하나만. 냠냠이 시선과 단계 응원은 마지막 것 기준 그대로.
 - **부모 화면 = 시안 A "놀이 친구"** (2026-10-16 사용자 결정): 아이 화면의 하늘색 세계를 이어 받은 둥근 카드, 번호 붙은 4묶음(그림 완성 방식 / 누구랑·어디로 / 밥 먹는 동안 / 소리와 저울), 숫자는 −/+(키보드 안 뜸), 캐릭터·테마는 그림 카드, 기록은 도장판·완성 그림·14일 막대·식사 목록, 아래 고정 "저장하기". 글꼴 Paperlogy(PT&, SIL OFL 1.1 — 공식 페이지와 글꼴 name 테이블에서 확인, 원본 TTF 4굵기를 `app/fonts/`, 라이선스 `Paperlogy-OFL.txt`)는 `/parent` 에만(`app/parent/layout.tsx`), 앱 나머지는 D2Coding·Jua 그대로. 색·크기 조정은 `app/parent/parent.css`(`.parent-a` 안에서 shadcn 변수 --primary 등을 주황으로, 스위치·슬라이더 손잡이 크게). 코드: `components/parent/{ui,SettingsForm,History,Dashboard,ParentApp}.tsx`, `lib/parent/words.ts`("하린이의" 조사, 아침/점심/저녁, 도장 주 = 한국 시간 월~일). **고른 아이 = 이 기기에서 먹는 아이**(사용자: "이 기기에서 식사" 글씨 불필요) — 아이 칩을 누르면 설정·기록이 그 아이로 바뀌고 `/play` 도 그 아이로. 확인 스크립트 `C:/dev/_backup/nyamnyam-garden-v3/tools/parent-a.mjs <출력폴더>`(가짜 Supabase 응답, 휴대폰·데스크톱 설정/기록 + 로그인 화면). 2026-10-16 Codex 리뷰 3회: 도장 주 시간대, 탭 목록 기본 높이 `group-data-horizontal/tabs:h-8` 를 `h-auto` 로 덮기, localStorage 가 막힌 브라우저에서 저장 후 다시 불러와도 지금 고른 아이 유지 → 마지막 리뷰 지적 없음, 커밋·dev push.

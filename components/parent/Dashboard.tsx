@@ -12,16 +12,10 @@ import { possessive } from "@/lib/parent/words";
 import type { Db } from "@/lib/supabase/client";
 import type { ChildRow } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
+import { DeviceTab } from "./DeviceTab";
 import { History } from "./History";
 import { SettingsForm } from "./SettingsForm";
-import {
-  CharacterArt,
-  cardClass,
-  goClass,
-  hintClass,
-  pillClass,
-  Section,
-} from "./ui";
+import { CharacterArt, cardClass, goClass, hintClass, pillClass } from "./ui";
 
 const tabClass =
   "h-auto flex-none rounded-full px-3.5 py-2 text-[15px] font-bold text-[#1f4651] data-active:bg-[#1f4651] data-active:text-white data-active:hover:text-white";
@@ -190,19 +184,7 @@ export function Dashboard({
             <History key={child.id} db={db} child={child} />
           </TabsContent>
           <TabsContent value="device" className="text-base">
-            <Section
-              title={
-                <>
-                  <Scale className="size-5" />
-                  저울 기기
-                </>
-              }
-            >
-              <p>
-                저울 등록, 연결 상태, 무게 맞추기는 다음 단계(7단계)에서
-                추가돼요. 지금은 아이 화면의 시뮬레이터로 체험할 수 있어요.
-              </p>
-            </Section>
+            <DeviceTab db={db} />
           </TabsContent>
         </Tabs>
       )}
