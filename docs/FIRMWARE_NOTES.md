@@ -146,7 +146,7 @@ DB: `supabase/migrations/0003_devices.sql` (`devices`, `device_state`, `device_c
 
 ## 7. 테스트 절차 (부품이 오면)
 
-1. **Supabase 준비(한 번)**: SQL 편집기에서 `supabase/migrations/0003_devices.sql` 실행 → `npx supabase login` → `npx supabase functions deploy device-ingest --project-ref <ref> --no-verify-jwt`, `device-commands` 도 같이.
+1. **Supabase 준비(한 번)** — 2026-10-17 완료(0003 실행, 두 함수 배포·JWT 검사 끔). 다시 할 때: SQL 편집기에서 `supabase/migrations/0003_devices.sql` 실행 → `npx supabase login` → `npx supabase functions deploy device-ingest --project-ref <ref> --no-verify-jwt`, `device-commands` 도 같이(또는 대시보드 편집기에 세 파일을 한 폴더로, import 는 `./`).
 2. **기기 등록**: 부모 화면 > 저울 > 저울 등록하기 → 보이는 세 줄을 `firmware/nyamnyam/secrets.h` 에(`secrets.example.h` 복사), Wi-Fi 이름·비밀번호도.
 3. **업로드**: Arduino IDE, 보드 "ESP32 Dev Module", 라이브러리 HX711(Bogdan Necula)·ArduinoJson 7.x. 시리얼 115200.
 4. **시리얼 확인**: 부팅 메시지 → `p` 로 무게·안정·Wi-Fi 확인. 처음 부팅은 저울 위를 비운 채로(빈 저울에서 영점 자동).
