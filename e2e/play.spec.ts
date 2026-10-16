@@ -29,13 +29,17 @@ test("play screen fits the device at stage 5", async ({ page }) => {
   await expect(debug).toContainText("식판 350g", { timeout: 15_000 });
   await setFood(page, 200);
   await expect(debug).toContainText("SERVED", { timeout: 15_000 });
-  // Eat in bites: dropping 50%+ at once would be held back as suspected dumping.
-  for (const [grams, pct] of [
-    [150, "25"],
-    [100, "50"],
-    [60, "70"],
+  // Eat in spoonfuls: a quick drop of 30g+ is taken for food picked up by hand
+  // and waits until it is put back.
+  for (const [steps, pct] of [
+    [[175, 150], "25"],
+    [[125, 100], "50"],
+    [[80, 60], "70"],
   ] as const) {
-    await setFood(page, grams);
+    const [first, last] = steps;
+    await setFood(page, first);
+    await page.waitForTimeout(2500); // let it settle: one stable drop per spoonful
+    await setFood(page, last);
     await expect(page.getByRole("progressbar")).toHaveAttribute(
       "aria-valuenow",
       pct,

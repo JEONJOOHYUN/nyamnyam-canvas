@@ -675,6 +675,7 @@ function SettingsForm({
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const ENDED_BY: Record<MealRow["ended_by"], string> = {
   auto: "자동",
   full_button: "배불러요",
@@ -746,9 +747,21 @@ function History({ db, child }: { db: Db; child: ChildRow }) {
     const grams = meals
       .filter((m) => new Date(m.ended_at).toLocaleDateString("sv-SE") === key)
       .reduce((sum, m) => sum + m.eaten_g, 0);
-    return { key, label: `${d.getMonth() + 1}/${d.getDate()}`, grams };
+    return {
+      key,
+      label: `${d.getMonth() + 1}/${d.getDate()}`,
+      day: d.getDate(),
+      weekday: WEEKDAYS[d.getDay()],
+      grams,
+    };
   });
   const max = Math.max(1, ...days.map((d) => d.grams));
+  const eatenDays = days.filter((d) => d.grams);
+  const average = eatenDays.length
+    ? Math.round(
+        eatenDays.reduce((sum, d) => sum + d.grams, 0) / eatenDays.length,
+      )
+    : 0;
 
   return (
     <div className="grid gap-4">
@@ -759,32 +772,60 @@ function History({ db, child }: { db: Db; child: ChildRow }) {
       <Card>
         <CardHeader>
           <CardTitle>최근 14일 먹은 양</CardTitle>
+          <CardDescription>
+            {days[0].label} ~ {days[13].label}
+            {average ? ` · 먹은 날 평균 ${average}g` : ""}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div
             role="img"
             aria-label={`최근 14일 먹은 양: ${
-              days
-                .filter((d) => d.grams)
-                .map((d) => `${d.label} ${d.grams}g`)
-                .join(", ") || "기록 없음"
+              eatenDays.map((d) => `${d.label} ${d.grams}g`).join(", ") ||
+              "기록 없음"
             }`}
-            className="flex h-40 items-end gap-1"
+            className="grid grid-cols-14 gap-0.5 sm:gap-1.5"
           >
-            {days.map((d) => (
-              <div
-                key={d.key}
-                className="flex flex-1 flex-col items-center gap-1"
-              >
-                <div
-                  className="w-full rounded-t bg-primary/70"
-                  style={{ height: `${(d.grams / max) * 120}px` }}
-                />
-                <span className="text-[10px] text-muted-foreground">
-                  {d.label}
-                </span>
-              </div>
-            ))}
+            {days.map((d, i) => {
+              const today = i === days.length - 1;
+              return (
+                <div key={d.key} className="flex min-w-0 flex-col items-center">
+                  <span className="h-4 text-[10px] leading-4 text-muted-foreground tabular-nums">
+                    {d.grams || ""}
+                  </span>
+                  <div className="flex h-28 w-full items-end justify-center">
+                    {d.grams ? (
+                      <div
+                        className={`w-full max-w-7 rounded-t-sm ${today ? "bg-primary" : "bg-primary/45"}`}
+                        style={{
+                          height: `${Math.max(4, (d.grams / max) * 100)}%`,
+                        }}
+                      />
+                    ) : (
+                      <div className="h-0.5 w-full max-w-7 rounded-full bg-border" />
+                    )}
+                  </div>
+                  <span
+                    className={`mt-1.5 text-xs leading-4 tabular-nums ${today ? "font-bold text-foreground" : "text-foreground/80"}`}
+                  >
+                    {d.day}
+                  </span>
+                  <span
+                    className={`text-[10px] leading-3 ${
+                      today
+                        ? "font-bold text-primary"
+                        : d.weekday === "일"
+                          ? "text-red-500/80"
+                          : d.weekday === "토"
+                            ? "text-blue-500/80"
+                            : "text-muted-foreground"
+                    }`}
+                  >
+                    {today ? "오늘" : d.weekday}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

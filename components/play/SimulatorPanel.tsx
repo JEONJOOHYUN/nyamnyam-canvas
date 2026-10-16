@@ -64,6 +64,15 @@ export function SimulatorPanel({
             <button
               type="button"
               className={btn}
+              onClick={act(() =>
+                sim.handG ? sim.putDown(20) : sim.pickUp(60),
+              )}
+            >
+              {sim.handG ? "빵 내려놓기 (20g 먹음)" : "빵 들기 (60g)"}
+            </button>
+            <button
+              type="button"
+              className={btn}
               onClick={act(() => sim.setLifted(!sim.lifted))}
             >
               {sim.lifted ? "식판 내려놓기" : "식판 들기 (0g)"}
@@ -94,8 +103,8 @@ export function SimulatorPanel({
             {meal.phase} 식판 {meal.trayG ?? "-"}g 음식 {Math.round(meal.foodG)}
             g
             <br />
-            먹음 {Math.round(meal.eatenG)}g 보류 {Math.round(meal.heldG)}g{" "}
-            {meal.lifted ? "(들림)" : ""}
+            먹음 {Math.round(meal.eatenG)}g 손·보류 {Math.round(meal.heldG)}g
+            {meal.heldSuspect ? "(쏟음?)" : ""} {meal.lifted ? "(들림)" : ""}
           </p>
         </div>
       )}
