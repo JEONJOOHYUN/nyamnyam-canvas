@@ -1,13 +1,7 @@
 import type { MotionValue } from "motion/react";
 import type { CharacterId, Line } from "@/content/lines";
+import { voices } from "@/content/voices";
 import { getAudioContext } from "./sfx";
-
-// Browser TTS stand-in until the Clova Dubbing files exist (spec §13).
-const TTS_VOICE: Record<CharacterId, { pitch: number; rate: number }> = {
-  nyamnyam: { pitch: 1.6, rate: 0.95 },
-  pongdang: { pitch: 1.35, rate: 1 },
-  banjjak: { pitch: 1.15, rate: 0.9 },
-};
 
 let voiceVolume = 1;
 let stopCurrent: (() => void) | null = null;
@@ -89,8 +83,8 @@ export function speak(
         u.voice =
           speechSynthesis.getVoices().find((v) => v.lang.startsWith("ko")) ??
           null;
-        u.pitch = TTS_VOICE[character].pitch;
-        u.rate = TTS_VOICE[character].rate;
+        u.pitch = voices[character].tts.pitch;
+        u.rate = voices[character].tts.rate;
         u.volume = voiceVolume;
         // TTS gives no audio stream to analyse, so flap the beak while it talks.
         u.onstart = () =>

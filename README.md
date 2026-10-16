@@ -42,6 +42,6 @@ HX711 VCC → ESP32 **3V3**, GND → GND, DT → **GPIO16**, SCK → **GPIO4**. 
 
 ## 출처 표기
 
-- 음성: 네이버 클로바더빙 (제작 후 추가)
+- 음성: ElevenLabs
 - 효과음: Web Audio API로 직접 합성
 - 글꼴: Jua (Google Fonts), D2Coding 1.4.0 (NAVER) — 모두 SIL OFL
