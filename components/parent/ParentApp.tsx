@@ -16,7 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { hashPin } from "@/lib/parent/settings";
 import { getSupabase, type Db } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { Dashboard } from "./Dashboard";
+import { CharacterArt, cardClass, goClass, pillClass } from "./ui";
 
 type Stage =
   | { kind: "loading" }
@@ -99,19 +101,32 @@ export function ParentApp() {
     };
   }, [db]);
 
+  if (stage.kind === "ready" && db)
+    return <Dashboard db={db} onSignOut={() => void db.auth.signOut()} />;
+
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-6 px-4 py-8">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">부모 설정</h1>
-          <p className="text-sm text-muted-foreground">냠냠캔버스</p>
+    <main className="mx-auto flex w-full max-w-xl flex-col gap-5 px-4 pt-5 pb-16">
+      <header className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5">
+          <span className="size-14.5 shrink-0 overflow-hidden rounded-full border-[3px] border-[#e8892b] bg-white">
+            <CharacterArt character="nyamnyam" face />
+          </span>
+          <div>
+            <p className="text-[12.5px] text-[#4b7280]">부모 설정</p>
+            <h1 className="text-[25px] leading-tight font-extrabold tracking-tight">
+              냠냠캔버스
+            </h1>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Link href="/play" className={buttonVariants({ variant: "outline" })}>
+        <div className="flex gap-1.5">
+          <Link href="/play" className={cn(buttonVariants(), pillClass)}>
             아이 화면으로
           </Link>
-          {stage.kind === "ready" || stage.kind === "pin" ? (
-            <Button variant="ghost" onClick={() => void db?.auth.signOut()}>
+          {stage.kind === "pin" ? (
+            <Button
+              className={pillClass}
+              onClick={() => void db?.auth.signOut()}
+            >
               로그아웃
             </Button>
           ) : null}
@@ -154,7 +169,6 @@ export function ParentApp() {
           }}
         />
       )}
-      {stage.kind === "ready" && db && <Dashboard db={db} />}
     </main>
   );
 }
@@ -187,14 +201,16 @@ function AuthForm({ db }: { db: Db }) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{mode === "signIn" ? "로그인" : "보호자 가입"}</CardTitle>
+    <Card className={cardClass}>
+      <CardHeader className="px-1">
+        <CardTitle className="text-lg font-extrabold">
+          {mode === "signIn" ? "로그인" : "보호자 가입"}
+        </CardTitle>
         <CardDescription>
           아이가 설정을 바꾸지 않도록 보호자 계정으로 들어와요.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-1">
         <form onSubmit={submit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">이메일</Label>
@@ -227,12 +243,12 @@ function AuthForm({ db }: { db: Db }) {
             </p>
           )}
           <div className="flex flex-wrap gap-2">
-            <Button type="submit" disabled={busy}>
+            <Button type="submit" disabled={busy} className={goClass}>
               {mode === "signIn" ? "로그인" : "가입하기"}
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              className={pillClass}
               onClick={() => {
                 setMode(mode === "signIn" ? "signUp" : "signIn");
                 setMessage(null);
@@ -315,15 +331,15 @@ function PinForm({
         required
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
-        className="w-32 text-center text-lg tracking-[0.5em]"
+        className="h-12 w-36 rounded-xl text-center text-xl tracking-[0.5em]"
       />
     </div>
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
+    <Card className={cardClass}>
+      <CardHeader className="px-1">
+        <CardTitle className="text-lg font-extrabold">
           {forgot ? "비밀번호 확인" : setting ? "PIN 정하기" : "PIN 입력"}
         </CardTitle>
         <CardDescription>
@@ -332,7 +348,7 @@ function PinForm({
             : "아이가 실수로 설정에 들어오지 않도록 숫자 4자리를 써요."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-1">
         <form onSubmit={submit} className="grid gap-4">
           {forgot ? (
             <div className="grid gap-2">
@@ -358,13 +374,13 @@ function PinForm({
             </p>
           )}
           <div className="flex flex-wrap gap-2">
-            <Button type="submit">
+            <Button type="submit" className={goClass}>
               {forgot ? "확인" : setting ? "저장" : "열기"}
             </Button>
             {!setting && !forgot && (
               <Button
                 type="button"
-                variant="ghost"
+                className={pillClass}
                 onClick={() => setForgot(true)}
               >
                 PIN 을 잊었어요
