@@ -16,19 +16,34 @@ import { visiblePieces } from "@/components/garden/growth";
 import { pickLine, type LineKey } from "@/content/lines";
 import { sfx, unlockAudio } from "@/lib/audio/sfx";
 import { speak, stopSpeaking } from "@/lib/audio/voice";
+import { setSfxVolume } from "@/lib/audio/sfx";
+import { setVoiceVolume } from "@/lib/audio/voice";
 import {
-  defaultMealConfig,
   initialMealState,
   mealReducer,
   type MealEvent,
   type MealState,
 } from "@/lib/meal/machine";
 import {
-  DEFAULT_STAGE_THRESHOLDS,
-  shouldPromptIdle,
-  STAGE_COUNT,
-  stageFor,
-} from "@/lib/meal/stage";
+  EMPTY_CARRY,
+  mealCompleted,
+  nextCarry,
+  pictureProgress,
+  stageProgress,
+  type PictureCarry,
+} from "@/lib/meal/picture";
+import { shouldPromptIdle, STAGE_COUNT, stageFor } from "@/lib/meal/stage";
+import {
+  loadPlayConfig,
+  loadUnsaved,
+  newId,
+  saveMeal,
+  storeUnsaved,
+  type MealSave,
+} from "@/lib/parent/data";
+import { DEFAULT_SETTINGS, type PlaySettings } from "@/lib/parent/settings";
+import { getSupabase } from "@/lib/supabase/client";
+import type { ChildRow } from "@/lib/supabase/types";
 import { createWeightSource } from "@/lib/weight";
 import { SimulatorSource } from "@/lib/weight/simulator";
 import type { WeightReading } from "@/lib/weight/types";
@@ -36,15 +51,11 @@ import { Confetti, Stamp } from "./Celebration";
 import { SimulatorPanel } from "./SimulatorPanel";
 import { StartScreen } from "./StartScreen";
 
-// shortcut: parent settings arrive in stage 6; until then these are the spec defaults.
-const SETTINGS = { showPercent: true, fullButton: true, stampAt: 0.7 };
 // Vercel Preview deploys (dev branch) keep the simulator so the screen can be tried on a tablet.
 const SHOW_SIMULATOR =
   process.env.NODE_ENV !== "production" ||
   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
 
-// The scene finishes at the last stage threshold, when the completion cheer plays.
-const SCENE_DONE_AT = DEFAULT_STAGE_THRESHOLDS[STAGE_COUNT - 1] / 100;
 const PORTRAIT = "(orientation: portrait)";
 const subscribePortrait = (onChange: () => void) => {
   const query = window.matchMedia(PORTRAIT);
@@ -53,17 +64,58 @@ const subscribePortrait = (onChange: () => void) => {
 };
 
 type Action = MealEvent | { type: "reset" };
-const reduce = (s: MealState, a: Action) =>
-  a.type === "reset" ? initialMealState : mealReducer(s, a, defaultMealConfig);
+type Config = {
+  settings: PlaySettings;
+  child: ChildRow | null;
+  carry: PictureCarry;
+};
+const DEMO: Config = {
+  settings: DEFAULT_SETTINGS,
+  child: null,
+  carry: EMPTY_CARRY,
+};
+const lastThreshold = (s: PlaySettings) => s.stageThresholds[STAGE_COUNT - 1];
+const baselineStage = ({ settings, carry }: Config) =>
+  stageFor(
+    stageProgress(
+      settings,
+      pictureProgress(settings, carry, { progress: 0, eatenG: 0 }),
+      lastThreshold(settings),
+    ),
+    settings.stageThresholds,
+  );
 
 export function PlayScreen() {
   const [source] = useState(createWeightSource);
+  // Demo defaults until (and unless) a signed-in parent's child settings load.
+  const [config, setConfig] = useState<Config>(DEMO);
+  const { settings, carry } = config;
+  // A signed-in parent's settings must be in place before the child can start.
+  const [ready, setReady] = useState(() => getSupabase() === null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  // Meals whose save failed, kept until a retry goes through.
+  // Finished meals not yet confirmed by the server, mirrored in localStorage.
+  const [unsaved, setUnsaved] = useState<MealSave[]>([]);
+  const [saveFailed, setSaveFailed] = useState(false);
+  // The signed-in parent the queue belongs to (null in demo).
+  const userId = useRef<string | null>(null);
+  const updateUnsaved = (change: (list: MealSave[]) => MealSave[]) =>
+    setUnsaved((list) => {
+      const next = change(list);
+      if (userId.current) storeUnsaved(userId.current, next);
+      return next;
+    });
   const [character, setCharacter] = useState<GardenCharacterKey | null>(null);
   const [theme, setTheme] = useState<GardenThemeKey | null>(null);
   const started = theme !== null;
   const [greeted, setGreeted] = useState(false);
   const [reading, setReading] = useState<WeightReading | null>(null);
-  const [meal, dispatch] = useReducer(reduce, initialMealState);
+  const [meal, dispatch] = useReducer(
+    (s: MealState, a: Action) =>
+      a.type === "reset" ? initialMealState : mealReducer(s, a, settings),
+    initialMealState,
+  );
   const [bubble, setBubble] = useState<string | null>(null);
   const [celebrationOver, setCelebrationOver] = useState(false);
   const [stamped, setStamped] = useState(false);
@@ -72,8 +124,16 @@ export function PlayScreen() {
   const pick = useRef(0);
   const prevStage = useRef(0);
   const idle = useRef({ changedAt: 0, promptAt: 0, count: 0 });
+  const servedAt = useRef(0);
+  // Applied on "new meal", never while the finished meal is still on screen.
+  const pendingCarry = useRef<PictureCarry | null>(null);
+  const saved = useRef(false);
 
-  const stage = stageFor(meal.progress);
+  // Picture progress under the parent's completion mode (A/B/C), never below what's carried.
+  const thresholds = settings.stageThresholds;
+  const picture = pictureProgress(settings, carry, meal);
+  const staged = stageProgress(settings, picture, lastThreshold(settings));
+  const stage = stageFor(staged, thresholds);
   const eating = meal.phase === "SERVED" || meal.phase === "EATING";
   const celebrating = stage === STAGE_COUNT && !celebrationOver;
   const portrait = useSyncExternalStore(
@@ -82,8 +142,79 @@ export function PlayScreen() {
     () => false,
   );
 
+  useEffect(() => {
+    const db = getSupabase();
+    if (!db) return;
+    let live = true;
+    // The page keeps its state across visits (cacheComponents) and this effect runs again
+    // on every return, so each visit starts over from fresh settings and the start screen:
+    // the parent may have switched the child, the lock, or the mode, and saved meals are
+    // already in the carry the server returns.
+    const restart = (next: Config) => {
+      stopSpeaking();
+      pick.current++;
+      pendingCarry.current = null;
+      saved.current = false;
+      setTheme(null);
+      setCharacter(null);
+      setGreeted(false);
+      setStamped(false);
+      setCelebrationOver(false);
+      setBubble(null);
+      dispatch({ type: "reset" });
+      // Stages already earned by earlier meals are not cheered again.
+      prevStage.current = baselineStage(next);
+      setConfig(next);
+    };
+    // Meals left over from an earlier visit go to the server first, so the picture carry
+    // rebuilt from the server includes them. If any still fail, progress can't be trusted.
+    const flushThenLoad = async () => {
+      const { data } = await db.auth.getSession();
+      const uid = data.session?.user.id ?? null;
+      userId.current = uid;
+      if (!uid) return loadPlayConfig(db);
+      const pending = loadUnsaved(uid);
+      const results = await Promise.allSettled(
+        pending.map((r) => saveMeal(db, r)),
+      );
+      const left = pending.filter((_, i) => results[i].status === "rejected");
+      storeUnsaved(uid, left);
+      if (left.length) throw new Error(`${left.length} meal(s) still unsaved`);
+      return loadPlayConfig(db);
+    };
+    flushThenLoad()
+      .then((loaded) => {
+        if (!live) return;
+        restart(loaded ?? DEMO);
+        setUnsaved([]);
+        setSaveFailed(false);
+        setReady(true);
+      })
+      .catch((e: unknown) => {
+        if (!live) return;
+        console.warn("parent settings not loaded", e);
+        // Never carry on with the previous child's settings; ask to retry or demo.
+        restart(DEMO);
+        setLoadFailed(true);
+      });
+    return () => {
+      live = false;
+      // Leaving (or the page being hidden for another route): stop the session now, so
+      // nothing plays on with stale settings until the next visit has loaded fresh ones.
+      restart(DEMO);
+      setReady(false);
+      setLoadFailed(false);
+    };
+  }, [attempt]);
+
+  useEffect(() => {
+    setSfxVolume(settings.sfxVolume);
+    setVoiceVolume(settings.voiceVolume);
+  }, [settings.sfxVolume, settings.voiceVolume]);
+
+  // The scene finishes at the last stage threshold, when the completion cheer plays.
   // Point at each newly added piece for a moment (adjusting state during render, no effect).
-  const sceneProgress = Math.min(1, meal.progress / SCENE_DONE_AT);
+  const sceneProgress = Math.min(1, (staged * 100) / lastThreshold(settings));
   const pieceCount = visiblePieces(sceneProgress).length;
   const [seenPieces, setSeenPieces] = useState(pieceCount);
   const [pointing, setPointing] = useState(false);
@@ -103,7 +234,7 @@ export function PlayScreen() {
       : pointing
         ? "point"
         : "hello";
-  const pct = Math.round(meal.progress * 100);
+  const pct = Math.round(picture * 100);
 
   const say = useCallback(
     (key: LineKey) => {
@@ -168,9 +299,70 @@ export function PlayScreen() {
     };
   }, [stage, say]);
 
+  const stampEarned = meal.progress * 100 >= settings.stampPct;
+  useEffect(() => {
+    if (meal.phase === "SERVED") servedAt.current = Date.now();
+  }, [meal.phase]);
+
+  // Record the finished meal once, and queue what it adds to the next meal's picture.
+  const pictureDone = stage === STAGE_COUNT;
+  const ended = meal.phase === "ENDED";
+  useEffect(() => {
+    if (!ended || saved.current) return;
+    saved.current = true;
+    const completed = mealCompleted(
+      settings,
+      meal.progress,
+      thresholds[STAGE_COUNT - 1],
+    );
+    const id = newId();
+    pendingCarry.current = nextCarry(
+      settings,
+      carry,
+      { id, progress: meal.progress, eatenG: meal.eatenG, completed },
+      pictureDone,
+    );
+    const db = getSupabase();
+    const { child } = config;
+    if (!db || !child || meal.foodG === 0) return;
+    const now = new Date();
+    const record: MealSave = {
+      meal: {
+        id,
+        child_id: child.id,
+        started_at: new Date(servedAt.current || now.getTime()).toISOString(),
+        ended_at: now.toISOString(),
+        served_g: Math.round(meal.foodG),
+        eaten_g: Math.round(meal.eatenG),
+        max_progress: Math.min(1, meal.progress),
+        completed,
+        ended_by: meal.endedBy ?? "auto",
+      },
+      picture: pictureDone
+        ? {
+            id: newId(),
+            map: theme ?? child.theme_map,
+            character: character ?? child.theme_character,
+            earlierMealIds: carry.mealIds,
+          }
+        : null,
+      stamp: stampEarned,
+    };
+    // Kept on the device before the request, so closing the tab mid-save loses nothing.
+    updateUnsaved((list) => [...list, record]);
+    saveMeal(db, record)
+      .then(() => updateUnsaved((list) => list.filter((r) => r.meal.id !== id)))
+      .catch((e: unknown) => {
+        console.warn("meal not saved", e);
+        setSaveFailed(true);
+      });
+    // Runs once per meal: the guard above keeps later renders from saving again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ended]);
+
   // Stamp for a meal that ended at or above the stamp threshold.
   useEffect(() => {
-    if (meal.phase !== "ENDED" || meal.progress < SETTINGS.stampAt) return;
+    if (meal.phase !== "ENDED" || !stampEarned) return;
     const t = setTimeout(
       () => {
         setStamped(true);
@@ -179,7 +371,7 @@ export function PlayScreen() {
       meal.endedBy === "auto" ? 4000 : 300,
     );
     return () => clearTimeout(t);
-  }, [meal.phase, meal.progress, meal.endedBy]);
+  }, [meal.phase, stampEarned, meal.endedBy]);
 
   useEffect(() => {
     if (meal.lifted) void say("pause");
@@ -198,13 +390,23 @@ export function PlayScreen() {
     const id = setInterval(() => {
       const c = idle.current;
       const now = Date.now();
-      if (!shouldPromptIdle(c.changedAt, c.promptAt, c.count, now)) return;
+      if (
+        !shouldPromptIdle(
+          c.changedAt,
+          c.promptAt,
+          c.count,
+          now,
+          settings.idleSeconds,
+          settings.idleMaxPrompts,
+        )
+      )
+        return;
       c.promptAt = now;
       c.count++;
       void say("idle");
     }, 1000);
     return () => clearInterval(id);
-  }, [eating, meal.lifted, say]);
+  }, [eating, meal.lifted, say, settings.idleSeconds, settings.idleMaxPrompts]);
 
   const pickCharacter = (chosen: GardenCharacterKey) => {
     unlockAudio();
@@ -229,14 +431,40 @@ export function PlayScreen() {
   const full = () => {
     sfx.tap();
     dispatch({ type: "end", by: "full_button" });
-    void say(meal.progress >= SETTINGS.stampAt ? "fullStamp" : "full");
+    void say(stampEarned ? "fullStamp" : "full");
   };
 
   const reset = () => {
     sfx.tap();
     setStamped(false);
     setCelebrationOver(false);
+    const next = pendingCarry.current;
+    pendingCarry.current = null;
+    saved.current = false;
+    if (next) {
+      const nextConfig = { ...config, carry: next };
+      prevStage.current = baselineStage(nextConfig);
+      setConfig(nextConfig);
+    }
     dispatch({ type: "reset" });
+  };
+
+  // Retries are safe: every row carries its own id and saves are insert-or-skip.
+  const retrySaves = () => {
+    const db = getSupabase();
+    if (!db) return;
+    setSaveFailed(false);
+    for (const record of unsaved)
+      saveMeal(db, record)
+        .then(() =>
+          updateUnsaved((list) =>
+            list.filter((r) => r.meal.id !== record.meal.id),
+          ),
+        )
+        .catch((e: unknown) => {
+          console.warn("meal still not saved", e);
+          setSaveFailed(true);
+        });
   };
 
   const touch = () => {
@@ -269,23 +497,34 @@ export function PlayScreen() {
           <span className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[max(0.75rem,env(safe-area-inset-top))] rounded-full bg-white/70 px-3 py-1 font-sans text-xs text-[#245964]">
             {statusLabel}
           </span>
+          {saveFailed && unsaved.length > 0 && (
+            <button
+              type="button"
+              onClick={retrySaves}
+              className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[calc(max(0.75rem,env(safe-area-inset-top))+2.25rem)] min-h-11 rounded-full bg-white/90 px-4 font-sans text-sm text-[#7a4b00]"
+            >
+              기록 {unsaved.length}개 저장 안 됨 · 다시 저장
+            </button>
+          )}
           {/* Top-right keeps the bottom of the scene, where pieces grow, uncovered. */}
           <div className="absolute right-[max(0.75rem,env(safe-area-inset-right))] top-[max(0.75rem,env(safe-area-inset-top))] flex flex-col items-end gap-3">
             <span
               role="progressbar"
-              aria-label="먹은 만큼"
+              aria-label={
+                settings.mode === "amount" ? "먹은 만큼" : "그림 완성까지"
+              }
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={pct}
               className={
-                SETTINGS.showPercent
+                settings.showPercent
                   ? "rounded-full bg-white/80 px-4 py-1 text-[clamp(1rem,3vmin,1.4rem)]"
                   : "sr-only"
               }
             >
               {pct}%
             </span>
-            {SETTINGS.fullButton && eating && (
+            {settings.fullButton && eating && (
               <button
                 type="button"
                 onClick={full}
@@ -300,7 +539,9 @@ export function PlayScreen() {
                 onClick={reset}
                 className="min-h-14 min-w-36 rounded-full border-2 border-white bg-[#3f9b3c] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#2a6d28] active:translate-y-px"
               >
-                새 그림 시작
+                {pictureDone || settings.mode === "amount"
+                  ? "새 그림 시작"
+                  : "다음 식사"}
               </button>
             )}
           </div>
@@ -311,7 +552,29 @@ export function PlayScreen() {
 
         {!started && (
           <StartScreen
+            ready={ready}
+            failed={loadFailed}
+            onRetry={() => {
+              setLoadFailed(false);
+              setAttempt((n) => n + 1);
+            }}
+            onDemo={() => {
+              setLoadFailed(false);
+              setReady(true);
+            }}
             character={character}
+            locked={
+              config.child && !settings.childPicksTheme
+                ? {
+                    character: config.child.theme_character,
+                    theme: config.child.theme_map,
+                  }
+                : null
+            }
+            onLockedStart={(locked) => {
+              pickCharacter(locked.character);
+              start(locked.theme);
+            }}
             onCharacter={pickCharacter}
             onBack={() => {
               sfx.tap();

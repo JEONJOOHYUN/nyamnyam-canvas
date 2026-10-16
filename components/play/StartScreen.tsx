@@ -16,13 +16,30 @@ const THEME_COLOR: Record<GardenThemeKey, string> = {
 const TITLE = "냠냠캔버스";
 
 // Two taps before the meal: who to eat with, then where to play (that friend's world first).
+type Locked = { character: GardenCharacterKey; theme: GardenThemeKey };
+
 export function StartScreen({
+  ready,
+  failed,
+  onRetry,
+  onDemo,
   character,
+  locked,
+  onLockedStart,
   onCharacter,
   onBack,
   onTheme,
 }: {
+  // False while a signed-in parent's settings are still loading.
+  ready: boolean;
+  // Settings could not be read: retry, or play without saving (demo).
+  failed: boolean;
+  onRetry: () => void;
+  onDemo: () => void;
   character: GardenCharacterKey | null;
+  // Parent fixed the friend and world: one start button instead of the two pickers.
+  locked: Locked | null;
+  onLockedStart: (locked: Locked) => void;
   onCharacter: (key: GardenCharacterKey) => void;
   onBack: () => void;
   onTheme: (key: GardenThemeKey) => void;
@@ -53,7 +70,60 @@ export function StartScreen({
             ))}
           </h1>
 
-          {character === null ? (
+          {failed ? (
+            <div role="alert" className="grid justify-items-center gap-3">
+              <p className="text-[clamp(1.2rem,4vmin,1.6rem)]">
+                보호자 설정을 불러오지 못했어요
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="min-h-12 rounded-full bg-[#006b86] px-6 text-white"
+                >
+                  다시 시도
+                </button>
+                <button
+                  type="button"
+                  onClick={onDemo}
+                  className="min-h-12 rounded-full bg-white px-6 text-[#006b86]"
+                >
+                  기록 없이 시작
+                </button>
+              </div>
+            </div>
+          ) : !ready ? (
+            <p role="status" className="text-[clamp(1.2rem,4vmin,1.6rem)]">
+              준비하고 있어요…
+            </p>
+          ) : locked ? (
+            <button
+              type="button"
+              onClick={() => onLockedStart(locked)}
+              className="flex w-[min(80vw,24rem)] flex-col overflow-hidden rounded-3xl border-4 bg-white shadow-lg active:translate-y-px"
+              style={{ borderColor: THEME_COLOR[locked.theme] }}
+            >
+              <span
+                aria-hidden="true"
+                className="theme-card-scene relative block aspect-[4/3] w-full"
+              >
+                <GardenScene
+                  theme={locked.theme}
+                  character={locked.character}
+                  progress={1}
+                  layout="wide"
+                  pose="hello"
+                  bubble={null}
+                />
+              </span>
+              <span
+                className="py-3 text-[clamp(1.4rem,4.5vmin,2rem)] text-white"
+                style={{ background: THEME_COLOR[locked.theme] }}
+              >
+                시작하기
+              </span>
+            </button>
+          ) : character === null ? (
             <>
               <p className="text-[clamp(1.4rem,4.5vmin,2rem)]">
                 누구랑 먹을까?
