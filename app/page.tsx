@@ -11,6 +11,20 @@ export default function Home() {
       >
         식사 시작
       </Link>
+      <div className="flex flex-wrap justify-center gap-2">
+        <Link
+          href="/demo"
+          className="min-h-11 rounded-full bg-white px-5 py-2.5 text-[#245964] shadow-sm"
+        >
+          저울 없이 체험해 보기
+        </Link>
+        <Link
+          href="/parent"
+          className="min-h-11 rounded-full bg-white px-5 py-2.5 text-[#245964] shadow-sm"
+        >
+          보호자 설정
+        </Link>
+      </div>
     </main>
   );
 }

@@ -154,6 +154,8 @@ DB: `supabase/migrations/0003_devices.sql` (`devices`, `device_state`, `device_c
 6. **웹 연결**: 부모 화면 "이 화면은 어떤 저울을 쓸까요?"에서 저울 고르기 → 아이 화면 왼쪽 위가 "저울 연결됨", 전원을 뽑으면 3초 뒤 "저울을 기다리고 있어요", 다시 꽂으면 이어서.
 7. **인터넷 없는 시연장(선택)**: `#define USE_SUPABASE 0`, `#define LOCAL_WS 1`(WebSockets 라이브러리) → 시리얼에 나온 IP 로 `ws://<ip>:81` 을 부모 화면에서 고른다. **http://localhost 로 연 화면에서만** 된다(https 페이지는 ws:// 를 막음).
 
+**부품 없이 실제 경로 확인**: `FAKE_SCALE_ID=<id> FAKE_SCALE_KEY=<key> node scripts/fake-scale.mjs` — 펌웨어처럼 `device-ingest` 로 무게를 보내고 명령에 `done` 으로 답한다(그램 입력 + Enter, `r` 재부팅, `q` 종료). 2026-10-17 이 방법으로 실제 Supabase 에서 Realtime·영점·보정·last_seen·offline 표시까지 확인.
+
 ## 8. 자주 하는 실수
 
 - HX711을 5V에 연결

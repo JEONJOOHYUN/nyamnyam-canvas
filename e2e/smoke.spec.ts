@@ -8,3 +8,23 @@ test("home renders without horizontal scroll", async ({ page }) => {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("demo mode starts without an account and never calls Supabase", async ({
+  page,
+}) => {
+  const supabaseCalls: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes(".supabase.co")) supabaseCalls.push(r.url());
+  });
+  await page.goto("/demo");
+  await page.getByRole("button", { name: "냠냠이" }).last().click();
+  await page
+    .getByRole("button", { name: /바람 우체국/ })
+    .first()
+    .click();
+  await expect(page.getByText("시연 모드")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "시뮬레이터 닫기" }),
+  ).toBeVisible();
+  expect(supabaseCalls).toEqual([]);
+});

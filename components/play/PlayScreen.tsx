@@ -91,16 +91,21 @@ const baselineStage = ({ settings, carry }: Config) =>
     settings.stageThresholds,
   );
 
-const statusText = (source: WeightSource) =>
-  source instanceof SimulatorSource
-    ? "시뮬레이터"
-    : source.status === "online"
-      ? "저울 연결됨"
-      : source.status === "connecting"
-        ? "저울 찾는 중…"
-        : "저울을 기다리고 있어요";
+// Demo mode (/demo) never touches the parent's account: no settings, no saved meals.
+const dbOf = (demo: boolean) => (demo ? null : getSupabase());
 
-export function PlayScreen() {
+const statusText = (source: WeightSource, demo: boolean) =>
+  demo
+    ? "시연 모드"
+    : source instanceof SimulatorSource
+      ? "시뮬레이터"
+      : source.status === "online"
+        ? "저울 연결됨"
+        : source.status === "connecting"
+          ? "저울 찾는 중…"
+          : "저울을 기다리고 있어요";
+
+export function PlayScreen({ demo = false }: { demo?: boolean }) {
   // The simulator stands in (same on server and client) until this device's pick is
   // known: from the parent's account once loaded, or at the start tap without Supabase.
   const [weight, setWeight] = useState(() => ({
@@ -108,28 +113,31 @@ export function PlayScreen() {
     source: createWeightSource({ kind: "simulator" }, null),
   }));
   const source = weight.source;
-  const applyWeight = useCallback((choice: WeightChoice) => {
-    const key = choiceKey(choice);
-    setWeight((w) =>
-      w.key === key
-        ? w
-        : { key, source: createWeightSource(choice, getSupabase()) },
-    );
-  }, []);
+  const applyWeight = useCallback(
+    (choice: WeightChoice) => {
+      const key = choiceKey(choice);
+      setWeight((w) =>
+        w.key === key
+          ? w
+          : { key, source: createWeightSource(choice, dbOf(demo)) },
+      );
+    },
+    [demo],
+  );
   const subscribeStatus = useCallback(
     (cb: () => void) => source.onStatus(cb),
     [source],
   );
   const statusLabel = useSyncExternalStore(
     subscribeStatus,
-    () => statusText(source),
-    () => statusText(source),
+    () => statusText(source, demo),
+    () => statusText(source, demo),
   );
   // Demo defaults until (and unless) a signed-in parent's child settings load.
   const [config, setConfig] = useState<Config>(DEMO);
   const { settings, carry } = config;
   // A signed-in parent's settings must be in place before the child can start.
-  const [ready, setReady] = useState(() => getSupabase() === null);
+  const [ready, setReady] = useState(() => dbOf(demo) === null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   // Meals whose save failed, kept until a retry goes through.
@@ -181,7 +189,7 @@ export function PlayScreen() {
   );
 
   useEffect(() => {
-    const db = getSupabase();
+    const db = dbOf(demo);
     if (!db) return;
     let live = true;
     // The page keeps its state across visits (cacheComponents) and this effect runs again
@@ -249,7 +257,7 @@ export function PlayScreen() {
       setReady(false);
       setLoadFailed(false);
     };
-  }, [attempt, applyWeight]);
+  }, [attempt, applyWeight, demo]);
 
   useEffect(() => {
     setSfxVolume(settings.sfxVolume);
@@ -366,7 +374,7 @@ export function PlayScreen() {
       { id, progress: meal.progress, eatenG: meal.eatenG, completed },
       pictureDone,
     );
-    const db = getSupabase();
+    const db = dbOf(demo);
     const { child } = config;
     if (!db || !child || meal.foodG === 0) return;
     const now = new Date();
@@ -469,7 +477,8 @@ export function PlayScreen() {
 
   const start = (chosen: GardenThemeKey) => {
     sfx.tap();
-    if (!getSupabase()) applyWeight(offlineChoice());
+    if (!dbOf(demo))
+      applyWeight(demo ? { kind: "simulator" } : offlineChoice());
     setTheme(chosen);
   };
 
@@ -496,7 +505,7 @@ export function PlayScreen() {
 
   // Retries are safe: every row carries its own id and saves are insert-or-skip.
   const retrySaves = () => {
-    const db = getSupabase();
+    const db = dbOf(demo);
     if (!db) return;
     setSaveFailed(false);
     for (const record of unsaved)
@@ -625,14 +634,16 @@ export function PlayScreen() {
           />
         )}
 
-        {SHOW_SIMULATOR && started && source instanceof SimulatorSource && (
-          <SimulatorPanel
-            sim={source}
-            reading={reading}
-            meal={meal}
-            onReset={reset}
-          />
-        )}
+        {(SHOW_SIMULATOR || demo) &&
+          started &&
+          source instanceof SimulatorSource && (
+            <SimulatorPanel
+              sim={source}
+              reading={reading}
+              meal={meal}
+              onReset={reset}
+            />
+          )}
       </main>
     </MotionConfig>
   );
