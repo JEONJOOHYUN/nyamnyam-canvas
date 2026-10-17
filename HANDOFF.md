@@ -26,7 +26,7 @@
    ④ ~~누름·호버 반응~~ **2026-10-17 완료**: `app/globals.css` `.tap-pop`(누르면 0.95, 놓으면 넘침 곡선으로 튀어 오름, 마우스 기기만 호버 2px 들림, reduced-motion 이면 없음 — `scale`/`translate` 속성이라 `transform` 애니메이션과 안 부딪힘). 시작 화면 카드·버튼, 배불러요·새 그림·전체화면, 홈 링크, 부모 화면 go/pill 버튼·선택 카드·탭·아이 칩에 적용.
    ⑤ 배포 정리(2번).
    - `scripts/fake-scale.mjs`(2026-10-17 추가): 등록한 저울 ID·키로 펌웨어처럼 `device-ingest` 에 무게를 보내고 명령에 답하는 가짜 저울(`FAKE_SCALE_ID=… FAKE_SCALE_KEY=… node scripts/fake-scale.mjs`, 그램 입력·`r` 재부팅·`q` 종료).
-2. **배포**: Production(`main`)은 아직 1단계 커밋 `5816aea`("준비 중이에요" 홈 화면). `dev`→`main` 합치기는 **사용자 확인 후**(시연 모드 뒤 합치기를 추천해 둠). 합칠 때 Supabase Auth > URL Configuration > Redirect URLs 에 Production 주소 추가.
+2. ~~배포~~ **2026-10-17 완료**: 사용자 결정으로 `dev`→`main` fast-forward(29커밋, `e2812ce`) → Vercel Production https://nyamnyam-canvas.vercel.app (로그인 없이 공개, 개발용 `/design/*` 은 404). Supabase Redirect URLs 에 `https://nyamnyam-canvas.vercel.app/**` 추가(Site URL 은 메이플과 같이 쓰는 프로젝트라 그대로). 실제 사이트에서 홈 링크 3개·`/demo` 시뮬레이터 패널·`/parent` 로그인 화면(Supabase 연결)·`/play` 패널 숨김·PWA 태그 확인. 앞으로도 평소 작업은 `dev`, `main` 합치기는 사용자 확인 후.
 3. ~~실제 계정 확인~~ **2026-10-17 완료**(사용자가 Preview 에서 가입·로그인·PIN·아이 "안양우" 추가까지 해 둔 뒤 Claude 가 확인): 식사 기록 빈 화면 → `/play` 시뮬레이터로 200g 중 150g(75%) 먹고 배불러요 → 저장 대기열 비움·도장판 토요일 도장·14일 막대 150g 확인(그림은 95% 미만이라 0장, 정상). 저울 탭에서 "테스트 저울" `nyam-c3ezdf` 등록 → 가짜 저울로 실제 Edge Function 에 무게 전송 → 보정 마법사 "연결됨 · 지금 0.5g", 영점·보정 명령 왕복, ±5g 통과, 목록 "방금 연결됐어요 · 보정함", `/play` "저울 연결됨"·45% 까지 진행, 저울 끄면 3초 뒤 "저울을 기다리고 있어요". **실제 DB 에 남은 확인 데이터**: 식사 1건(150g, 도장 1개), 테스트 저울 1대(사용자가 지워도 됨 — 저울 탭 "삭제" 두 번), 끝내지 않은 식사는 저장 안 됨. 그 브라우저의 저울 선택(localStorage)은 원래대로(시뮬레이터) 되돌림.
 4. **부품 도착 후**: 펌웨어 컴파일(이 PC 에 Arduino IDE 없음)·실기기 확인 — 순서는 `docs/FIRMWARE_NOTES.md` §7.
 5. 음성 남은 것: 개발 모드 "음성 점검" 화면, '만든 사람들' 화면 출처 표기(화면 아직 없음).
