@@ -34,7 +34,17 @@
     opacity: 0.5;
   }
 }
+/* Home page: the three friends bob a little, out of step. */
+.home-friend {
+  animation: home-bob 2.6s ease-in-out infinite;
+}
+@keyframes home-bob {
+  50% {
+    translate: 0 -8px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .home-friend,
   .start-letter,
   .start-drift,
   .start-rise {

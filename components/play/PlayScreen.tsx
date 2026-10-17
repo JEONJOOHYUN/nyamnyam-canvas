@@ -56,6 +56,8 @@ import {
 import { SimulatorSource } from "@/lib/weight/simulator";
 import type { WeightReading, WeightSource } from "@/lib/weight/types";
 import { Confetti, Stamp } from "./Celebration";
+import { AUTO_ROUNDS, useAutoMeal } from "./autoDemo";
+import { AutoDemoStart } from "./AutoDemoStart";
 import { SimulatorPanel } from "./SimulatorPanel";
 import { StartScreen } from "./StartScreen";
 
@@ -96,18 +98,28 @@ const baselineStage = ({ settings, carry }: Config) =>
 // Demo mode (/demo) never touches the parent's account: no settings, no saved meals.
 const dbOf = (demo: boolean) => (demo ? null : getSupabase());
 
-const statusText = (source: WeightSource, demo: boolean) =>
-  demo
-    ? "시연 모드"
-    : source instanceof SimulatorSource
-      ? "시뮬레이터"
-      : source.status === "online"
-        ? "저울 연결됨"
-        : source.status === "connecting"
-          ? "저울 찾는 중…"
-          : "저울을 기다리고 있어요";
+const statusText = (source: WeightSource, demo: boolean, auto: boolean) =>
+  auto
+    ? "자동 시연"
+    : demo
+      ? "시연 모드"
+      : source instanceof SimulatorSource
+        ? "시뮬레이터"
+        : source.status === "online"
+          ? "저울 연결됨"
+          : source.status === "connecting"
+            ? "저울 찾는 중…"
+            : "저울을 기다리고 있어요";
 
-export function PlayScreen({ demo = false }: { demo?: boolean }) {
+export function PlayScreen({
+  demo: demoProp = false,
+  auto = false,
+}: {
+  demo?: boolean;
+  // Auto demo (/demo/auto): meals play themselves, round after round (autoDemo.ts).
+  auto?: boolean;
+}) {
+  const demo = demoProp || auto;
   // The simulator stands in (same on server and client) until this device's pick is
   // known: from the parent's account once loaded, or at the start tap without Supabase.
   const [weight, setWeight] = useState(() => ({
@@ -132,8 +144,8 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
   );
   const statusLabel = useSyncExternalStore(
     subscribeStatus,
-    () => statusText(source, demo),
-    () => statusText(source, demo),
+    () => statusText(source, demo, auto),
+    () => statusText(source, demo, auto),
   );
   // Demo defaults until (and unless) a signed-in parent's child settings load.
   const [config, setConfig] = useState<Config>(DEMO);
@@ -508,6 +520,39 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
     dispatch({ type: "reset" });
   };
 
+  // Auto demo: the next friend and world once a meal and its celebration are over.
+  const [round, setRound] = useState(0);
+  useAutoMeal(
+    auto && started && source instanceof SimulatorSource ? source : null,
+    round,
+    () => {
+      reset();
+      const next = AUTO_ROUNDS[(round + 1) % AUTO_ROUNDS.length];
+      pickCharacter(next.character);
+      setTheme(next.theme);
+      setRound(round + 1);
+    },
+  );
+
+  // The page keeps its state when left and revisited (cacheComponents), but the loop
+  // starts over: so leaving the auto demo returns it to the start tap with a fresh meal.
+  useEffect(() => {
+    if (!auto) return;
+    return () => {
+      stopSpeaking();
+      prevStage.current = 0;
+      pendingCarry.current = null;
+      setTheme(null);
+      setCharacter(null);
+      setGreeted(false);
+      setStamped(false);
+      setCelebrationOver(false);
+      setBubble(null);
+      dispatch({ type: "reset" });
+      setRound(0);
+    };
+  }, [auto]);
+
   // Retries are safe: every row carries its own id and saves are insert-or-skip.
   const retrySaves = () => {
     const db = dbOf(demo);
@@ -576,7 +621,7 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
             >
               {pct}%
             </span>
-            {settings.fullButton && eating && (
+            {settings.fullButton && eating && !auto && (
               <button
                 type="button"
                 onClick={full}
@@ -585,7 +630,7 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
                 배불러요
               </button>
             )}
-            {meal.phase === "ENDED" && (
+            {meal.phase === "ENDED" && !auto && (
               <button
                 type="button"
                 onClick={reset}
@@ -602,7 +647,7 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
         {celebrating && <Confetti />}
         {stamped && <Stamp />}
 
-        {!started && canFullscreen && (
+        {!started && canFullscreen && !auto && (
           <button
             type="button"
             onClick={enterFullscreen}
@@ -613,7 +658,18 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
           </button>
         )}
 
-        {!started && (
+        {!started && auto && (
+          <AutoDemoStart
+            onStart={() => {
+              if (canFullscreen) enterFullscreen();
+              const first = AUTO_ROUNDS[0];
+              pickCharacter(first.character);
+              start(first.theme);
+            }}
+          />
+        )}
+
+        {!started && !auto && (
           <StartScreen
             ready={ready}
             failed={loadFailed}
@@ -651,6 +707,7 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
         )}
 
         {(SHOW_SIMULATOR || demo) &&
+          !auto &&
           started &&
           source instanceof SimulatorSource && (
             <SimulatorPanel

@@ -28,3 +28,21 @@ test("demo mode starts without an account and never calls Supabase", async ({
   ).toBeVisible();
   expect(supabaseCalls).toEqual([]);
 });
+
+test("auto demo starts with one tap and hides the controls", async ({
+  page,
+}) => {
+  const supabaseCalls: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes(".supabase.co")) supabaseCalls.push(r.url());
+  });
+  await page.goto("/demo/auto");
+  await page.getByRole("button", { name: "시작하기" }).click();
+  await expect(page.getByText("자동 시연")).toBeVisible();
+  await expect(page.getByRole("progressbar")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "시뮬레이터 닫기" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "배불러요" })).toHaveCount(0);
+  expect(supabaseCalls).toEqual([]);
+});

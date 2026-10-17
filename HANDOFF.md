@@ -7,6 +7,13 @@
 > 지금 상태·다음 할 일·결정·함정만 둔다. 지난 과정(시안 버전별, 리뷰 회차별 지적, 음성 후보 선정)은 [docs/HISTORY.md](docs/HISTORY.md).
 > 원본 요구사항 [docs/SPEC.md](docs/SPEC.md), 기기 계약 [docs/FIRMWARE_NOTES.md](docs/FIRMWARE_NOTES.md).
 
+## 지금 이어서 할 것 (2026-10-17 오후, 토큰 소진 직전 정리)
+
+- **방금 끝낸 것(dev push 됨, main 은 아직)**: ① 홈 화면(`app/page.tsx`)을 아이 시작 화면과 같은 모양으로 — 배경·통통 제목은 `components/play/StartDecor.tsx`(`StartDecor`, `BouncyTitle`, 시작 화면과 공유), 세 친구 흔들림(`start.css` `.home-friend`), 버튼: 식사 시작 / 저울 없이 체험해 보기(직접 해 보기 `/demo`, 자동으로 보기 `/demo/auto`) / 보호자 설정. ② **자동 시연 `/demo/auto`**(사용자 요청: 시연장에 켜 두기): "시작하기" 한 번(소리·전체화면 허용용) → 냠냠이·우체국 → 퐁당이·바다 → 반짝이·우주를 끝없이 반복. `components/play/autoDemo.ts`(`AUTO_ROUNDS`, `AUTO_TIMING`, `useAutoMeal` — 시뮬레이터에 시간표대로 무게: 빈 식판 5.5초 → 200g 담기 6.5초 → 2.2초마다 10g → 끝나고 11초 축하 뒤 다음 판), `AutoDemoStart.tsx`(시작 탭 화면), `PlayScreen` `auto` prop(시뮬레이터 패널·배불러요·새 그림 버튼 숨김, 칩 "자동 시연", 페이지를 떠나면 시작 탭으로 초기화 — Codex 지적: cacheComponents 로 식사 상태가 남아 어긋났음). 한 판 약 56초(0→100%) + 축하, 2판째 퐁당이·바다 확인. e2e 24개(자동 시연 추가) 통과.
+- **사용자에게 물어볼 것**: 이 변경을 `main` 에 합쳐 실제 사이트에 올릴지(시연에 쓰려면 필요). 합치는 법: `git checkout main && git merge --ff-only dev && git push origin main && git checkout dev` → https://nyamnyam-canvas.vercel.app 에서 `/`·`/demo/auto` 확인.
+- Codex 리뷰: 자동 시연 1회 지적 1건 반영(재방문 초기화). 반영이 작아 다시 리뷰는 생략(규칙상 허용, 사용자에게 알림).
+- 그다음 남은 것: 부품 도착 후 펌웨어 컴파일·실기기(`docs/FIRMWARE_NOTES.md` §7). 주황 버튼 색은 유지로 결정됨.
+
 ## 현재 상태 (2026-10-17)
 
 - **1~7단계 완료, 모두 `dev` push. 작업 트리 깨끗, 진행 중인 일 없음.** 다음은 8단계(아래 "다음 할 일" 1번).
