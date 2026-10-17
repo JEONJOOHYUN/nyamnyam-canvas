@@ -71,7 +71,7 @@
    - 남은 것: 사용자 청취 확인, 개발 모드 "음성 점검" 화면·'만든 사람들' 화면 출처 표기(화면은 아직 없음).
 3. **다음 단계 = 8단계 마무리 (부품 없이 가능, 사용자가 "진행해" 하면 이것부터)**: SPEC §11 8번 — ① **시연 모드**(로그인 없이 시뮬레이터로 바로 체험, Production 에서도 무게를 넣을 수 있게 — 지금 Production 은 시뮬레이터 패널이 숨겨져 저울 없이는 아무것도 안 움직임) ② PWA(홈 화면 추가)·Wake Lock(식사 중 화면 꺼짐 방지)·전체화면 ③ 접근성·성능 점검 ④ 누름·호버 반응 애니메이션(버튼·카드가 눌렸다 튀어 오름, 마우스 기기만 호버, reduced-motion 존중) ⑤ Vercel 배포 정리(아래 4번).
    - 같이 하면 좋은 것(제안만, 사용자 결정 전): `scripts/fake-scale.mjs` — 부모 화면에서 등록한 저울 ID·키로 가짜 무게를 `device-ingest` 에 보내 실제 Supabase·Realtime 경로를 부품 없이 끝까지 확인.
-4. **배포 상태(2026-10-17 확인)**: Production(`main`)은 아직 1단계 커밋 `5816aea`("준비 중이에요" 홈 화면)이고 dev 가 19커밋 앞섬. dev Preview https://nyamnyam-canvas-git-dev-joohyun.vercel.app 은 최신이지만 Vercel 로그인 필요(배포 보호). **Vercel 환경변수에 Supabase URL·anon key 가 들어갔는지 확인 필요**(2026-10-15 기록은 "환경변수 없음" — 없으면 `/parent` 는 "Supabase 가 연결되지 않았어요", `/play` 는 시뮬레이터 체험만). `dev`→`main` 합치기는 사용자 확인 후.
+4. **배포 상태(2026-10-17 확인)**: Production(`main`)은 아직 1단계 커밋 `5816aea`("준비 중이에요" 홈 화면)이고 dev 가 19커밋 앞섬. dev Preview https://nyamnyam-canvas-git-dev-joohyun.vercel.app 은 최신이지만 Vercel 로그인 필요(배포 보호). **Vercel 환경변수 2026-10-17 추가**: `NEXT_PUBLIC_SUPABASE_URL`(Claude), `NEXT_PUBLIC_SUPABASE_ANON_KEY`(사용자 — 키 입력은 Claude 가 안 함), 둘 다 Config 형식·Production+Preview. dev Preview 다시 배포 후 `/parent` 로그인 화면 확인. **main 합칠 때 할 일**: Supabase Auth > URL Configuration 의 Redirect URLs 에 Production 주소 추가(지금은 localhost·Preview 패턴만). `dev`→`main` 합치기는 사용자 확인 후.
 5. 사용자가 직접: `/parent` 실제 로그인으로 아이·설정·저울 등록 확인. 부품 도착 후: 펌웨어 컴파일·실기기(`docs/FIRMWARE_NOTES.md` §7).
 
 ## 다시 시작할 때 (토큰이 끊겨도 이어서)
