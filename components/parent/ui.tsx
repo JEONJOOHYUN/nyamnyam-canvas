@@ -229,7 +229,8 @@ export function WorldThumb({
     <span
       aria-hidden="true"
       className={cn(
-        "relative block aspect-[4/3] w-full overflow-hidden",
+        // theme-card-scene: wing outlines scaled like the body (garden.css), as on the start screen.
+        "theme-card-scene relative block aspect-[4/3] w-full overflow-hidden",
         className,
       )}
     >
