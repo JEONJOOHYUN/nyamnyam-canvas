@@ -130,7 +130,7 @@ const MODES: [PlaySettings["mode"], string, string, ReactNode][] = [
 // A card that is one radio choice. The radio itself sits in the corner for keyboard and
 // screen readers; the whole card is its label.
 const choiceClass =
-  "relative grid cursor-pointer content-start justify-items-center gap-1 rounded-[18px] border-[3px] p-0 text-center leading-snug font-normal";
+  "tap-pop relative grid cursor-pointer content-start justify-items-center gap-1 rounded-[18px] border-[3px] p-0 text-center leading-snug font-normal";
 
 export function SettingsForm({
   db,

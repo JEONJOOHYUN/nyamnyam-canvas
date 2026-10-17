@@ -79,14 +79,14 @@ export function StartScreen({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="min-h-12 rounded-full bg-[#006b86] px-6 text-white"
+                  className="tap-pop min-h-12 rounded-full bg-[#006b86] px-6 text-white"
                 >
                   다시 시도
                 </button>
                 <button
                   type="button"
                   onClick={onDemo}
-                  className="min-h-12 rounded-full bg-white px-6 text-[#006b86]"
+                  className="tap-pop min-h-12 rounded-full bg-white px-6 text-[#006b86]"
                 >
                   기록 없이 시작
                 </button>
@@ -100,7 +100,7 @@ export function StartScreen({
             <button
               type="button"
               onClick={() => onLockedStart(locked)}
-              className="flex w-[min(80vw,24rem)] flex-col overflow-hidden rounded-3xl border-4 bg-white shadow-lg active:translate-y-px"
+              className="flex w-[min(80vw,24rem)] flex-col overflow-hidden rounded-3xl border-4 bg-white shadow-lg tap-pop"
               style={{ borderColor: THEME_COLOR[locked.theme] }}
             >
               <span
@@ -137,7 +137,7 @@ export function StartScreen({
                         key={key}
                         type="button"
                         onClick={() => onCharacter(key)}
-                        className="flex w-[clamp(10rem,24vw,15rem)] flex-col items-center overflow-hidden rounded-3xl border-4 bg-white shadow-lg active:translate-y-px portrait:w-[min(80vw,20rem)] portrait:flex-row"
+                        className="flex w-[clamp(10rem,24vw,15rem)] flex-col items-center overflow-hidden rounded-3xl border-4 bg-white shadow-lg tap-pop portrait:w-[min(80vw,20rem)] portrait:flex-row"
                         style={{ borderColor: THEME_COLOR[theme] }}
                       >
                         <span className="start-chick block aspect-square w-full p-2 portrait:w-2/5">
@@ -173,7 +173,7 @@ export function StartScreen({
                     key={key}
                     type="button"
                     onClick={() => onTheme(key)}
-                    className="flex w-[clamp(11rem,26vw,17rem)] flex-col overflow-hidden rounded-3xl border-4 bg-white shadow-lg active:translate-y-px portrait:w-[min(80vw,20rem)] portrait:flex-row portrait:items-center"
+                    className="flex w-[clamp(11rem,26vw,17rem)] flex-col overflow-hidden rounded-3xl border-4 bg-white shadow-lg tap-pop portrait:w-[min(80vw,20rem)] portrait:flex-row portrait:items-center"
                     style={{ borderColor: THEME_COLOR[key] }}
                   >
                     <span
@@ -201,7 +201,7 @@ export function StartScreen({
               <button
                 type="button"
                 onClick={onBack}
-                className="min-h-12 rounded-full bg-white/80 px-5 text-[clamp(1rem,3vmin,1.3rem)] text-[#006b86]"
+                className="tap-pop min-h-12 rounded-full bg-white/80 px-5 text-[clamp(1rem,3vmin,1.3rem)] text-[#006b86]"
               >
                 다른 친구 고르기
               </button>

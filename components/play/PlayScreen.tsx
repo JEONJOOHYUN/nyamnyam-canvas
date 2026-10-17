@@ -580,7 +580,7 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
               <button
                 type="button"
                 onClick={full}
-                className="min-h-14 min-w-36 rounded-full border-2 border-white bg-[#006b86] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#004759] active:translate-y-px"
+                className="tap-pop min-h-14 min-w-36 rounded-full border-2 border-white bg-[#006b86] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#004759] active:translate-y-px"
               >
                 배불러요
               </button>
@@ -589,7 +589,7 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
               <button
                 type="button"
                 onClick={reset}
-                className="min-h-14 min-w-36 rounded-full border-2 border-white bg-[#3f9b3c] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#2a6d28] active:translate-y-px"
+                className="tap-pop min-h-14 min-w-36 rounded-full border-2 border-white bg-[#3f9b3c] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#2a6d28] active:translate-y-px"
               >
                 {pictureDone || settings.mode === "amount"
                   ? "새 그림 시작"
@@ -607,7 +607,7 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
             type="button"
             onClick={enterFullscreen}
             aria-label="전체화면으로 보기"
-            className="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[60] grid size-11 place-items-center rounded-full bg-white/80 text-[#245964] shadow-sm"
+            className="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[60] tap-pop grid size-11 place-items-center rounded-full bg-white/80 text-[#245964] shadow-sm"
           >
             <Maximize className="size-5" />
           </button>

@@ -18,7 +18,7 @@ import { SettingsForm } from "./SettingsForm";
 import { CharacterArt, cardClass, goClass, hintClass, pillClass } from "./ui";
 
 const tabClass =
-  "h-auto flex-none rounded-full px-3.5 py-2 text-[15px] font-bold text-[#1f4651] data-active:bg-[#1f4651] data-active:text-white data-active:hover:text-white";
+  "tap-pop h-auto flex-none rounded-full px-3.5 py-2 text-[15px] font-bold text-[#1f4651] data-active:bg-[#1f4651] data-active:text-white data-active:hover:text-white";
 
 export function Dashboard({
   db,
@@ -105,7 +105,7 @@ export function Dashboard({
               key={c.id}
               aria-pressed={c.id === child?.id}
               onClick={() => select(c.id)}
-              className="h-auto min-h-11 shrink-0 gap-2 rounded-full border-[3px] border-transparent bg-white py-1 pr-4 pl-1 text-[15px] font-medium text-[#1f4651] shadow-[0_2px_0_#9bcfe4] hover:bg-[#f4fbff] aria-pressed:border-[#e8892b]"
+              className="tap-pop h-auto min-h-11 shrink-0 gap-2 rounded-full border-[3px] border-transparent bg-white py-1 pr-4 pl-1 text-[15px] font-medium text-[#1f4651] shadow-[0_2px_0_#9bcfe4] hover:bg-[#f4fbff] aria-pressed:border-[#e8892b]"
             >
               <span className="size-8.5 shrink-0 overflow-hidden rounded-full bg-[#fff3df]">
                 <CharacterArt character={c.theme_character} face />
@@ -117,7 +117,7 @@ export function Dashboard({
           <Button
             aria-expanded={adding}
             onClick={() => setAdding(!adding)}
-            className="h-auto min-h-11 shrink-0 rounded-full border-2 border-dashed border-[#9bcfe4] bg-transparent px-4 text-[14px] text-[#4b7280] hover:bg-white/60"
+            className="tap-pop h-auto min-h-11 shrink-0 rounded-full border-2 border-dashed border-[#9bcfe4] bg-transparent px-4 text-[14px] text-[#4b7280] hover:bg-white/60"
           >
             <Plus />
             아이 추가

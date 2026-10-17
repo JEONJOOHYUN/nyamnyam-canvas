@@ -44,7 +44,7 @@ type Listed = Pick<
 >;
 
 const choiceCard =
-  "relative flex min-h-12 cursor-pointer items-center gap-3 rounded-[18px] border-[3px] border-[#e3eef2] bg-[#f8fcfe] py-2 pr-10 pl-3 text-left font-normal has-[[data-checked]]:border-[#e8892b] has-[[data-checked]]:bg-[#fff6ea]";
+  "tap-pop relative flex min-h-12 cursor-pointer items-center gap-3 rounded-[18px] border-[3px] border-[#e3eef2] bg-[#f8fcfe] py-2 pr-10 pl-3 text-left font-normal has-[[data-checked]]:border-[#e8892b] has-[[data-checked]]:bg-[#fff6ea]";
 
 function seenText(at: string | null, now: number) {
   if (!at) return "아직 연결된 적 없어요";

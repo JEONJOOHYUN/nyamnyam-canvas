@@ -35,9 +35,9 @@ export const cardClass =
   "grid content-start gap-3 rounded-3xl border-[3px] border-white bg-white p-4 shadow-[0_4px_0_#b9dff0]";
 // White pill (secondary actions) and the orange "go" button.
 export const pillClass =
-  "h-auto min-h-10 rounded-full bg-white px-4 py-2 text-[13px] font-medium text-[#1f4651] shadow-[0_2px_0_#9bcfe4] hover:bg-[#f4fbff]";
+  "tap-pop h-auto min-h-10 rounded-full bg-white px-4 py-2 text-[13px] font-medium text-[#1f4651] shadow-[0_2px_0_#9bcfe4] hover:bg-[#f4fbff]";
 export const goClass =
-  "h-auto min-h-11 rounded-full bg-[#e8892b] px-6 py-2.5 text-[17px] font-bold text-white shadow-[0_3px_0_#b8661a] hover:bg-[#d97c20]";
+  "tap-pop h-auto min-h-11 rounded-full bg-[#e8892b] px-6 py-2.5 text-[17px] font-bold text-white shadow-[0_3px_0_#b8661a] hover:bg-[#d97c20]";
 export const hintClass = "text-[12.5px] leading-snug text-[#5b7c87]";
 
 export function Section({

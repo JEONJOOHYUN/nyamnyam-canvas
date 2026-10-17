@@ -23,7 +23,7 @@
    ① ~~시연 모드~~ **2026-10-17 완료**: `/demo` = `<PlayScreen demo />` — Supabase 를 전혀 부르지 않음(설정·저장 없음, e2e 로 요청 0건 확인), 무게는 항상 시뮬레이터, 시뮬레이터 패널은 Production 에서도 보임, 왼쪽 위 "시연 모드". 홈에 "저울 없이 체험해 보기"·"보호자 설정" 링크.
    ② ~~PWA·Wake Lock·전체화면~~ **2026-10-17 완료**: `app/manifest.ts`(start_url `/` — 설치 앱엔 주소창이 없어 보호자 화면으로 갈 길이 필요, display fullscreen, 아이콘 192·512·maskable), `layout.tsx` apple-touch-icon·appleWebApp·theme-color(운영 빌드에서 태그 확인 — 켜 둔 개발 서버는 layout 메타데이터를 다시 안 읽어 안 보였음), 아이콘은 `/design/icon`(개발·Preview 전용)을 `node scripts/make-icons.mjs` 로 찍어 `public/icons/`. `lib/screen.ts` `useWakeLock`(테마를 고른 뒤부터, 화면 숨김 뒤 다시 요청), 시작 화면 오른쪽 위 전체화면 버튼(지원·아직 전체화면 아님·설치 앱 아님일 때만). 서비스 워커 없음.
    ③ 접근성·성능 점검
-   ④ 누름·호버 반응 애니메이션(버튼·카드가 살짝 눌렸다 튀어 오름, 마우스 기기만 호버, `prefers-reduced-motion` 존중 — 2026-10-15 사용자 "요청 전까지 구현하지 말 것" → 2026-10-16 SPEC 에 추가됨)
+   ④ ~~누름·호버 반응~~ **2026-10-17 완료**: `app/globals.css` `.tap-pop`(누르면 0.95, 놓으면 넘침 곡선으로 튀어 오름, 마우스 기기만 호버 2px 들림, reduced-motion 이면 없음 — `scale`/`translate` 속성이라 `transform` 애니메이션과 안 부딪힘). 시작 화면 카드·버튼, 배불러요·새 그림·전체화면, 홈 링크, 부모 화면 go/pill 버튼·선택 카드·탭·아이 칩에 적용.
    ⑤ 배포 정리(2번).
    - `scripts/fake-scale.mjs`(2026-10-17 추가): 등록한 저울 ID·키로 펌웨어처럼 `device-ingest` 에 무게를 보내고 명령에 답하는 가짜 저울(`FAKE_SCALE_ID=… FAKE_SCALE_KEY=… node scripts/fake-scale.mjs`, 그램 입력·`r` 재부팅·`q` 종료).
 2. **배포**: Production(`main`)은 아직 1단계 커밋 `5816aea`("준비 중이에요" 홈 화면). `dev`→`main` 합치기는 **사용자 확인 후**(시연 모드 뒤 합치기를 추천해 둠). 합칠 때 Supabase Auth > URL Configuration > Redirect URLs 에 Production 주소 추가.
@@ -123,6 +123,7 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - `e2e/play.spec.ts` 는 개발 서버의 시뮬레이터 패널로 진행한다(TTS 는 지워서 결정적으로, "냠냠이" → "바람 우체국" 순서로 누름). 기기당 약 17초.
 - Playwright 브라우저는 chromium만 설치. 기기 6종 모두 chromium 뷰포트로 흉내 낸다(실제 Safari 아님).
 - Supabase SQL 편집기 탭에 저장 안 된 쿼리가 있으면 다른 페이지로 갈 때 "사이트에서 나가시겠습니까?" 가 떠 Claude in Chrome 이 멈춘다 → 새 탭에서 작업하고, 남은 탭은 사용자에게 "나가기" 를 부탁.
+- **백그라운드로 띄운 `npm run dev`·`next start` 를 TaskStop 해도 자식 node 가 포트를 잡고 남는다**(2026-10-17, 그래서 옛 코드를 계속 서빙 — 메타데이터·CSS 가 안 바뀐 것처럼 보였음). PowerShell `Get-NetTCPConnection -LocalPort <포트> -State Listen` 으로 PID 를 찾아 `Stop-Process`. 화면 변경이 안 보이면 먼저 이걸 의심.
 - 펌웨어는 컴파일해 본 적 없음(이 PC 에 Arduino IDE·arduino-cli 없음). 부품이 오면 가장 먼저 컴파일 확인.
 
 ## 펌웨어 연동 상태
