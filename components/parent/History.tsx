@@ -116,7 +116,7 @@ export function History({ db, child }: { db: Db; child: ChildRow }) {
           {week.map((d) => (
             <li
               key={d.key}
-              className="grid justify-items-center gap-1 text-xs text-[#5b7c87]"
+              className="grid justify-items-center gap-1 text-xs text-[#567681]"
             >
               <span
                 className={`grid aspect-square w-full max-w-12 place-items-center rounded-full ${
@@ -178,7 +178,7 @@ export function History({ db, child }: { db: Db; child: ChildRow }) {
             const isToday = i === days.length - 1;
             return (
               <div key={d.key} className="flex min-w-0 flex-col items-center">
-                <span className="h-4 text-[10px] leading-4 tracking-tighter whitespace-nowrap text-[#5b7c87] tabular-nums">
+                <span className="h-4 text-[10px] leading-4 tracking-tighter whitespace-nowrap text-[#567681] tabular-nums">
                   {d.grams || ""}
                 </span>
                 <div className="flex h-28 w-full items-end justify-center">
@@ -207,7 +207,7 @@ export function History({ db, child }: { db: Db; child: ChildRow }) {
                         ? "text-[#e5484d]"
                         : d.weekday === "토"
                           ? "text-[#3b7be0]"
-                          : "text-[#5b7c87]"
+                          : "text-[#567681]"
                   }`}
                 >
                   {isToday ? "오늘" : d.weekday}
@@ -254,7 +254,7 @@ export function History({ db, child }: { db: Db; child: ChildRow }) {
                     className={`rounded-full px-2 py-0.5 text-[11.5px] whitespace-nowrap ${
                       m.completed
                         ? "bg-[#e8f7ec] text-[#22693a]"
-                        : "bg-[#eef2f4] text-[#5b7c87]"
+                        : "bg-[#eef2f4] text-[#567681]"
                     }`}
                   >
                     {m.completed ? "목표 달성" : "다음에 또"}

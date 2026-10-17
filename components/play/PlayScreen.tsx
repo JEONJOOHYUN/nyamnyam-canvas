@@ -546,14 +546,14 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
             onChickTap={touch}
             mouth={mouth}
           />
-          <span className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[max(0.75rem,env(safe-area-inset-top))] rounded-full bg-white/70 px-3 py-1 font-sans text-xs text-[#245964]">
+          <span className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[max(0.75rem,env(safe-area-inset-top))] rounded-full bg-white/70 px-3 py-1 font-kid text-xs text-[#245964]">
             {statusLabel}
           </span>
           {saveFailed && unsaved.length > 0 && (
             <button
               type="button"
               onClick={retrySaves}
-              className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[calc(max(0.75rem,env(safe-area-inset-top))+2.25rem)] min-h-11 rounded-full bg-white/90 px-4 font-sans text-sm text-[#7a4b00]"
+              className="absolute left-[max(0.75rem,env(safe-area-inset-left))] top-[calc(max(0.75rem,env(safe-area-inset-top))+2.25rem)] min-h-11 rounded-full bg-white/90 px-4 font-kid text-sm text-[#7a4b00]"
             >
               기록 {unsaved.length}개 저장 안 됨 · 다시 저장
             </button>

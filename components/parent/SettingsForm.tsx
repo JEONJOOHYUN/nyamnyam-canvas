@@ -246,7 +246,7 @@ export function SettingsForm({
                 />
                 <span className="size-11">{icon}</span>
                 <strong className="text-[15px] font-bold">{title}</strong>
-                <span className="text-[11.5px] text-[#5b7c87]">{hint}</span>
+                <span className="text-[11.5px] text-[#567681]">{hint}</span>
               </Label>
             ))}
           </RadioGroup>
@@ -290,7 +290,7 @@ export function SettingsForm({
             <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-7">
               {s.stageThresholds.map((t, i) => (
                 <label key={i} className="grid gap-1 text-center text-[11px]">
-                  <span className="text-[#5b7c87]">{i + 1}단계</span>
+                  <span className="text-[#567681]">{i + 1}단계</span>
                   <Input
                     type="number"
                     min={1}

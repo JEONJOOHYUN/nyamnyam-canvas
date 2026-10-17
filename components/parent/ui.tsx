@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 export const COLORS = {
   ink: "#1f4651",
   orange: "#e8892b",
-  sea: "#1a8fb0",
+  sea: "#167f9d",
   space: "#6a4fc4",
   leaf: "#3aa55c",
   sun: "#ffd23f",
@@ -38,7 +38,7 @@ export const pillClass =
   "tap-pop h-auto min-h-10 rounded-full bg-white px-4 py-2 text-[13px] font-medium text-[#1f4651] shadow-[0_2px_0_#9bcfe4] hover:bg-[#f4fbff]";
 export const goClass =
   "tap-pop h-auto min-h-11 rounded-full bg-[#e8892b] px-6 py-2.5 text-[17px] font-bold text-white shadow-[0_3px_0_#b8661a] hover:bg-[#d97c20]";
-export const hintClass = "text-[12.5px] leading-snug text-[#5b7c87]";
+export const hintClass = "text-[12.5px] leading-snug text-[#567681]";
 
 export function Section({
   n,

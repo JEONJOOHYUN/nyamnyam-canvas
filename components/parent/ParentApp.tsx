@@ -206,11 +206,11 @@ function AuthForm({ db }: { db: Db }) {
         <CardTitle className="text-lg font-extrabold">
           {mode === "signIn" ? "로그인" : "보호자 가입"}
         </CardTitle>
-        <CardDescription>
-          {mode === "signIn"
-            ? "설정은 보호자만 바꿀 수 있어요. 가입한 이메일로 로그인해 주세요."
-            : "아이의 설정과 식사 기록이 이 계정에 저장돼요."}
-        </CardDescription>
+        {mode === "signUp" && (
+          <CardDescription>
+            아이의 설정과 식사 기록이 이 계정에 저장돼요.
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="px-1">
         <form onSubmit={submit} className="grid gap-4">

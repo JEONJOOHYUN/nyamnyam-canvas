@@ -10,7 +10,7 @@ import "./start.css";
 
 const THEME_COLOR: Record<GardenThemeKey, string> = {
   post: "#e8892b",
-  sea: "#1a8fb0",
+  sea: "#167f9d",
   space: "#6a4fc4",
 };
 const TITLE = "냠냠캔버스";
