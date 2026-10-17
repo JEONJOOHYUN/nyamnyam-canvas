@@ -1,5 +1,6 @@
 "use client";
 
+import { Maximize } from "lucide-react";
 import { MotionConfig, useMotionValue } from "motion/react";
 import {
   useCallback,
@@ -42,6 +43,7 @@ import {
   type MealSave,
 } from "@/lib/parent/data";
 import { DEFAULT_SETTINGS, type PlaySettings } from "@/lib/parent/settings";
+import { enterFullscreen, useCanGoFullscreen, useWakeLock } from "@/lib/screen";
 import { getSupabase } from "@/lib/supabase/client";
 import type { ChildRow } from "@/lib/supabase/types";
 import {
@@ -155,6 +157,9 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
   const [character, setCharacter] = useState<GardenCharacterKey | null>(null);
   const [theme, setTheme] = useState<GardenThemeKey | null>(null);
   const started = theme !== null;
+  // The screen stays on from the first tap on a theme until the page is left.
+  useWakeLock(started);
+  const canFullscreen = useCanGoFullscreen();
   const [greeted, setGreeted] = useState(false);
   const [reading, setReading] = useState<WeightReading | null>(null);
   const [meal, dispatch] = useReducer(
@@ -596,6 +601,17 @@ export function PlayScreen({ demo = false }: { demo?: boolean }) {
 
         {celebrating && <Confetti />}
         {stamped && <Stamp />}
+
+        {!started && canFullscreen && (
+          <button
+            type="button"
+            onClick={enterFullscreen}
+            aria-label="전체화면으로 보기"
+            className="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[60] grid size-11 place-items-center rounded-full bg-white/80 text-[#245964] shadow-sm"
+          >
+            <Maximize className="size-5" />
+          </button>
+        )}
 
         {!started && (
           <StartScreen

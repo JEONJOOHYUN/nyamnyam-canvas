@@ -167,6 +167,13 @@
 .theme-card-scene [vector-effect="non-scaling-stroke"] {
   stroke-width: calc(100cqw * 3.5 * 1.13 / 1000);
 }
+/* Parent screens' small character pictures (components/parent/ui.tsx CharacterArt). */
+.character-art {
+  container-type: inline-size;
+}
+.character-art [vector-effect="non-scaling-stroke"] {
+  stroke-width: calc(100cqw * 3.5 / var(--art-width));
+}
 .chick-breathe,
 .chick-hop,
 .chick-sway {

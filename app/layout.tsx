@@ -26,10 +26,18 @@ const jua = Jua({
 export const metadata: Metadata = {
   title: "냠냠캔버스",
   description: "먹은 만큼 그림이 자라나는 식습관 도우미",
+  // iOS doesn't read the manifest icons; it uses apple-touch-icon and these flags.
+  icons: { apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: {
+    capable: true,
+    title: "냠냠캔버스",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
   viewportFit: "cover",
+  themeColor: "#91dfff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

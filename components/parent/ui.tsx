@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import { useId, type CSSProperties, type ReactNode } from "react";
+import "@/components/garden/garden.css";
 import { Minus, Plus } from "lucide-react";
 import {
   CHARACTERS,
@@ -180,7 +181,12 @@ export function StepperRow({
   );
 }
 
-// A character's face (head crop) or whole body, drawn from the child screen's own SVG.
+// A character drawn from the child screen's own SVG: the whole body, or with `face` head
+// and shoulders for a round frame. The bust runs past the bottom of the box (slice), so
+// the frame's circle (overflow-hidden rounded-full) is the edge, never a flat crop line.
+const FULL_VIEW = { box: "-130 -240 260 270", width: 260 };
+const BUST_VIEW = { box: "-85 -232 170 200", width: 170 };
+
 export function CharacterArt({
   character,
   face,
@@ -191,14 +197,21 @@ export function CharacterArt({
   className?: string;
 }) {
   const { Component } = CHARACTERS[character];
+  const view = face ? BUST_VIEW : FULL_VIEW;
   return (
-    <svg
-      viewBox={face ? "-80 -232 160 160" : "-130 -240 260 270"}
-      aria-hidden="true"
-      className={cn("size-full", className)}
+    <span
+      className={cn("character-art block size-full", className)}
+      style={{ "--art-width": view.width } as CSSProperties}
     >
-      <Component pose="hello" />
-    </svg>
+      <svg
+        viewBox={view.box}
+        preserveAspectRatio={face ? "xMidYMin slice" : undefined}
+        aria-hidden="true"
+        className="size-full"
+      >
+        <Component pose="hello" />
+      </svg>
+    </span>
   );
 }
 
