@@ -1,8 +1,8 @@
 # HANDOFF — 냠냠캔버스 (nyamnyam-canvas)
 
-## 마지막 업데이트: 2026-10-16
+## 마지막 업데이트: 2026-10-17
 
-## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1` (4단계 반응형 완성)
+## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1` (7단계 기기 연동 준비 + Supabase 적용 기록)
 
 ## 현재 상태 요약
 
@@ -69,13 +69,15 @@
    - 한계: ElevenLabs 에 아이 목소리가 없어(정책) 어른 목소리 + 음 높임. 퐁당이는 1.3배라 더 느리게 못 함. 측정은 자동(음높이·속도·음량)이라 "울림"은 귀로 확인 필요 — 최종 파일 일부를 아티팩트 https://claude.ai/artifact/Q95roJCvU3FRQTuSARdv9a Version 4 에 올림. 사용 크레딧 약 4,000(30k 중).
    - **2026-10-16 사용자 청취 후 변경(현재 상태)**: 퐁당이는 그대로(Deoksu v2, 파일·캐시 그대로), 냠냠이·반짝이는 사용자가 2차 샘플의 v4 가 가장 좋다고 해서 **냠냠이 Annie `eleven_v4` / 반짝이 Anna Kim `eleven_v4`**(voice_settings 없이 목소리 기본값, 음 높임·속도 없음 — v4 는 speed 무시) 로 74줄 다시 생성. `content/voices.ts` 에 캐릭터별 `model`, `speed: number|null`, v2 설정은 `V2_SETTINGS`(퐁당이 캐시 해시 유지되게 요청 해시 형식 그대로). 반짝이 "빈 방처럼 울림" 확인: Jiyoung 원본은 쉼 구간 잡음 바닥이 최고 음량 대비 -37dB(다른 목소리 -59~-82dB)에 원래 소리가 작아(피크 -16~-28dB) 음량 맞춤 때 방 울림까지 커짐 → Anna Kim v4 는 -59dB. 측정 결과: 냠냠이 281Hz·4.2음절/초, 반짝이 246Hz·4.2, 퐁당이 229Hz·4.8. 한계: 반짝이가 퐁당이보다 음이 조금 높고 냠냠이와 2음 정도 차이 — 구분은 음색·말투로 됨(사용자가 귀로 고름). 청취 페이지 Version 5.
    - 남은 것: 사용자 청취 확인, 개발 모드 "음성 점검" 화면·'만든 사람들' 화면 출처 표기(화면은 아직 없음).
-3. 7단계 기기 연동, 8단계 마무리(누름·호버 애니메이션 포함 — SPEC §11 에 2026-10-16 추가). `dev`→`main` 합치기는 사용자 확인 후.
+3. **다음 단계 = 8단계 마무리 (부품 없이 가능, 사용자가 "진행해" 하면 이것부터)**: SPEC §11 8번 — ① **시연 모드**(로그인 없이 시뮬레이터로 바로 체험, Production 에서도 무게를 넣을 수 있게 — 지금 Production 은 시뮬레이터 패널이 숨겨져 저울 없이는 아무것도 안 움직임) ② PWA(홈 화면 추가)·Wake Lock(식사 중 화면 꺼짐 방지)·전체화면 ③ 접근성·성능 점검 ④ 누름·호버 반응 애니메이션(버튼·카드가 눌렸다 튀어 오름, 마우스 기기만 호버, reduced-motion 존중) ⑤ Vercel 배포 정리(아래 4번).
+   - 같이 하면 좋은 것(제안만, 사용자 결정 전): `scripts/fake-scale.mjs` — 부모 화면에서 등록한 저울 ID·키로 가짜 무게를 `device-ingest` 에 보내 실제 Supabase·Realtime 경로를 부품 없이 끝까지 확인.
+4. **배포 상태(2026-10-17 확인)**: Production(`main`)은 아직 1단계 커밋 `5816aea`("준비 중이에요" 홈 화면)이고 dev 가 19커밋 앞섬. dev Preview https://nyamnyam-canvas-git-dev-joohyun.vercel.app 은 최신이지만 Vercel 로그인 필요(배포 보호). **Vercel 환경변수에 Supabase URL·anon key 가 들어갔는지 확인 필요**(2026-10-15 기록은 "환경변수 없음" — 없으면 `/parent` 는 "Supabase 가 연결되지 않았어요", `/play` 는 시뮬레이터 체험만). `dev`→`main` 합치기는 사용자 확인 후.
+5. 사용자가 직접: `/parent` 실제 로그인으로 아이·설정·저울 등록 확인. 부품 도착 후: 펌웨어 컴파일·실기기(`docs/FIRMWARE_NOTES.md` §7).
 
 ## 다시 시작할 때 (토큰이 끊겨도 이어서)
 
-1. 2026-10-16 6단계·음성 모두 커밋·dev push 완료(7번째 리뷰 지적 2건 반영). 남은 것: 사용자 `/parent` 확인, 부모 화면 시안 3개(A 놀이 친구 / B 차분한 목록 / C 식사 기록장, 글꼴 Paperlogy) 2026-10-16 게시 https://claude.ai/artifact/QKEugAVmpXPczFjGFystq2 — 사용자 선택 대기. 원본 `C:/dev/_backup/nyamnyam-garden-v3/parent-design/`(`node build.mjs` 로 다시 만듦, 글꼴은 `%LOCALAPPDATA%/Microsoft/Windows/Fonts/Paperlogy-*.ttf`). 사용자 의견: 지금 설정 화면이 딱딱하고 D2Coding 이 구분하기 어려움 → Paperlogy 제안(앱에 넣기 전 라이선스 확인 필요). 같은 날 확인: 한 번에 많이 먹으면 부품 여러 개가 동시에 나옴 → 2026-10-16 사용자 결정으로 모두 함께 애니메이션("주요 설계 결정"). 음성은 ElevenLabs 로 완료("다음 할 일" 2번) → 6단계 커밋 다음 별도 커밋. 두 커밋 모두 리뷰 대상에 함께 들어감.
-   - 2026-10-16 저녁: 부모 화면 "최근 14일 먹은 양" 그래프 개편(날짜·요일 14일 모두, 막대 위 g, 기간·먹은 날 평균, 오늘 강조, 0g 날은 회색 선) — 시안 3개 그래프도 같은 아티팩트 Version 2. 손에 든 음식 처리는 넣었다가(`6506888`, Codex 리뷰 6회) 사용자 결정으로 되돌림("주요 설계 결정"). 부품 동시 등장 애니메이션 `3acbaa2`. 가짜 데이터로 /parent 기록 화면을 띄우는 스크립트 `C:/dev/_backup/nyamnyam-garden-v3/tools/parent-history.mjs <출력폴더>`(Supabase 응답을 Playwright route 로 흉내, 실제 DB 접근 없음).
-2. 6단계 커밋: `npm run lint && npm run typecheck && npm test && npx playwright test` → (03:21 이후) `node "$(ls -d ~/.claude/plugins/cache/openai-codex/codex/*/ | tail -1)scripts/codex-companion.mjs" review --wait` → 반영 → `.env*` 미포함 확인 → 커밋·dev push.
+1. 2026-10-17 기준 **작업 트리 깨끗, 1~7단계 모두 dev push**, Supabase 0003·Edge Function 2개 적용 완료. 진행 중인 일 없음 → 다음은 위 "다음 할 일" 3번(8단계). 커밋 전 규칙: lint·typecheck·test·e2e → Codex 리뷰(`C:devCLAUDE.md` §4, 2026-10-17부터 평소 `--model gpt-6.1-sol`, DB·RLS·인증·키 변경은 기본 모델, 다시 리뷰는 adversarial-review 로 고친 부분만) → 커밋·dev push.
+2. 지난 결정 기록(부모 화면 시안 A 확정, 빵 처리 제외, 부품 동시 등장 등)은 "주요 설계 결정과 이유", 6단계·음성 상세는 "다음 할 일" 1·2번.
 3. 확인용 스크립트(세션 임시 폴더에서 옮겨 둠): `C:/dev/_backup/nyamnyam-garden-v3/tools/` — `flow.mjs`(시작 화면 3단계 가로·세로·SE 캡처, 페이지 오류 출력), `faces.mjs <tag> <character...>`(시안 페이지 몸짓 5가지를 0.7초 간격 3장), `parent.mjs`(/parent 캡처), `shot.mjs`/`zoom.mjs`. 출력은 스크립트 폴더에 png. 비교 페이지 원본 `compare-page/`(아티팩트 https://claude.ai/artifact/E5RGwdW2v89NA93m5Eog8Z, 최신 Version 9 캐릭터).
 4. Claude in Chrome: Supabase·ElevenLabs 는 사용자 크롬에 로그인돼 있음(Claude 가 연 탭에서 보임). 클로바더빙은 확장이 막음. 외부 서비스 가입·로그인·18세 확인·API 키 입력은 Claude 가 하지 않는다.
 
@@ -90,7 +92,7 @@ npm run lint && npm run typecheck && npm test
 npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 ```
 
-배포: Vercel이 GitHub `main`(Production) / `dev`(Preview)를 자동 배포 — 아직 연결 안 됨.
+배포: Vercel 이 GitHub `main`(Production) / `dev`(Preview)를 자동 배포(2026-10-15 연결). 상태는 "다음 할 일" 4번.
 
 ## 환경변수 목록
 
@@ -150,7 +152,7 @@ npx playwright install chromium && npm run e2e   # 6개 기기 해상도
 
 ## 펌웨어 연동 상태
 
-- 펌웨어 코드 없음. 데이터 계약·공유 상수·전송 규칙은 2단계에서 확정(웹 `lib/weight/`). seq 재부팅 문제는 미결. 배선과 상세는 [docs/FIRMWARE_NOTES.md](docs/FIRMWARE_NOTES.md).
+- 2026-10-17 펌웨어 작성(`firmware/nyamnyam/nyamnyam.ino`, 컴파일·실기기 확인 전), Edge Function 2개·DB 0003 Supabase 적용 완료. seq 재부팅 문제는 웹이 처리하는 것으로 결정. 계약·명령·테스트 절차는 [docs/FIRMWARE_NOTES.md](docs/FIRMWARE_NOTES.md).
 
 ## 파일 구조 지도
 
