@@ -207,7 +207,9 @@ function AuthForm({ db }: { db: Db }) {
           {mode === "signIn" ? "로그인" : "보호자 가입"}
         </CardTitle>
         <CardDescription>
-          아이가 설정을 바꾸지 않도록 보호자 계정으로 들어와요.
+          {mode === "signIn"
+            ? "설정은 보호자만 바꿀 수 있어요. 가입한 이메일로 로그인해 주세요."
+            : "아이의 설정과 식사 기록이 이 계정에 저장돼요."}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-1">
@@ -254,7 +256,7 @@ function AuthForm({ db }: { db: Db }) {
                 setMessage(null);
               }}
             >
-              {mode === "signIn" ? "처음이에요 (가입)" : "이미 계정이 있어요"}
+              {mode === "signIn" ? "처음이라면 가입하기" : "이미 가입했어요"}
             </Button>
           </div>
         </form>

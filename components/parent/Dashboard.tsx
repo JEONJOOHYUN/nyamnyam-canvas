@@ -143,7 +143,7 @@ export function Dashboard({
           <CharacterArt character={child?.theme_character ?? "nyamnyam"} face />
         </span>
         <p className="relative rounded-[18px] bg-white px-3.5 py-2.5 font-kid text-[17px] shadow-[0_2px_0_#9bcfe4] before:absolute before:bottom-3 before:-left-2 before:border-y-8 before:border-r-8 before:border-y-transparent before:border-r-white">
-          많이 먹이기보다 적정량을 담아 주세요.
+          많이 먹이기보다, 아이에게 알맞은 양을 담아 주세요.
         </p>
       </div>
 
