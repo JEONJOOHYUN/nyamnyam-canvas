@@ -32,12 +32,12 @@ export const THEME_COLOR: Record<GardenThemeKey, string> = {
 };
 
 export const cardClass =
-  "grid content-start gap-3 rounded-3xl border-[3px] border-white bg-white p-4 shadow-[0_4px_0_#b9dff0]";
-// White pill (secondary actions) and the orange "go" button.
+  "grid content-start gap-3 rounded-3xl border-[3px] border-white bg-white p-4 shadow-[0_10px_28px_-18px_rgba(23,75,95,0.45)]";
+// White pill (secondary actions) and the orange "go" button (globals.css .btn-*).
 export const pillClass =
-  "tap-pop h-auto min-h-10 rounded-full bg-white px-4 py-2 text-[13px] font-medium text-[#1f4651] shadow-[0_2px_0_#9bcfe4] hover:bg-[#f4fbff]";
+  "tap-pop btn-plain h-auto min-h-10 rounded-full px-4 py-2 text-[13px] font-medium text-[#1f4651]";
 export const goClass =
-  "tap-pop h-auto min-h-11 rounded-full bg-[#e8892b] px-6 py-2.5 text-[17px] font-bold text-white shadow-[0_3px_0_#b8661a] hover:bg-[#d97c20]";
+  "tap-pop btn-solid h-auto min-h-11 rounded-full px-6 py-2.5 text-[17px] font-bold";
 export const hintClass = "text-[12.5px] leading-snug text-[#567681]";
 
 export function Section({
@@ -140,7 +140,7 @@ export function StepperRow({
   const id = useId();
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
   const stepButton =
-    "size-9 rounded-full bg-white text-[#1f4651] shadow-[0_2px_0_#b9dff0] hover:bg-[#f4fbff]";
+    "btn-plain size-9 rounded-full text-[#1f4651]";
   return (
     <div className="flex min-h-11 items-center justify-between gap-3">
       <RowLabel id={id} label={label} hint={hint} />

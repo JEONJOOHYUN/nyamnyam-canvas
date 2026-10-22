@@ -5,9 +5,19 @@ import { AUTO_ROUNDS } from "./autoDemo";
 import { BouncyTitle, StartDecor } from "./StartDecor";
 
 // One tap before the auto demo: browsers only play sound (and go fullscreen) after a tap.
-export function AutoDemoStart({ onStart }: { onStart: () => void }) {
+export function AutoDemoStart({
+  onStart,
+  leaving = false,
+}: {
+  onStart: () => void;
+  // The demo has started: fade out over the scene (PlayScreen unmounts it right after).
+  leaving?: boolean;
+}) {
   return (
-    <div className="start-screen fixed inset-0 z-50 overflow-hidden">
+    <div
+      className={`start-screen fixed inset-0 z-50 overflow-hidden ${leaving ? "start-leave" : ""}`}
+      inert={leaving}
+    >
       <StartDecor />
       <div className="relative grid size-full place-items-center overflow-y-auto p-6">
         <div className="flex w-full flex-col items-center gap-[clamp(0.75rem,3vmin,1.5rem)] text-center">
@@ -39,7 +49,7 @@ export function AutoDemoStart({ onStart }: { onStart: () => void }) {
           <button
             type="button"
             onClick={onStart}
-            className="tap-pop min-h-14 rounded-full border-4 border-white bg-[#6a4fc4] px-10 py-3 text-[clamp(1.5rem,4.5vmin,2rem)] text-white shadow-[0_5px_0_#4a3591]"
+            className="tap-pop btn-solid min-h-14 rounded-full px-10 py-3 text-[clamp(1.5rem,4.5vmin,2rem)] [--btn:#6a4fc4]"
           >
             시작하기
           </button>

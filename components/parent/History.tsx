@@ -149,7 +149,7 @@ export function History({ db, child }: { db: Db; child: ChildRow }) {
             {pictures.map((p) => (
               <li
                 key={p.id}
-                className="overflow-hidden rounded-xl border-[3px] border-white shadow-[0_2px_0_#b9dff0]"
+                className="overflow-hidden rounded-xl border-[3px] border-white shadow-[0_6px_14px_-8px_rgba(23,75,95,0.45)]"
               >
                 <WorldThumb theme={p.map} character={p.character} />
               </li>

@@ -105,7 +105,7 @@ export function Dashboard({
               key={c.id}
               aria-pressed={c.id === child?.id}
               onClick={() => select(c.id)}
-              className="tap-pop h-auto min-h-11 shrink-0 gap-2 rounded-full border-[3px] border-transparent bg-white py-1 pr-4 pl-1 text-[15px] font-medium text-[#1f4651] shadow-[0_2px_0_#9bcfe4] hover:bg-[#f4fbff] aria-pressed:border-[#e8892b]"
+              className="tap-pop btn-plain h-auto min-h-11 shrink-0 gap-2 rounded-full border-[3px] border-transparent py-1 pr-4 pl-1 text-[15px] font-medium text-[#1f4651] aria-pressed:border-[#e8892b]"
             >
               <span className="size-8.5 shrink-0 overflow-hidden rounded-full bg-[#fff3df]">
                 <CharacterArt character={c.theme_character} face />

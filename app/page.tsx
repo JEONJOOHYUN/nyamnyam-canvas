@@ -41,7 +41,7 @@ export default function Home() {
 
         <Link
           href="/play"
-          className="tap-pop min-h-14 rounded-full border-4 border-white bg-[#e8892b] px-10 py-3 text-[clamp(1.5rem,4.5vmin,2rem)] text-white shadow-[0_5px_0_#b8661a]"
+          className="tap-pop btn-solid min-h-14 rounded-full px-10 py-3 text-[clamp(1.5rem,4.5vmin,2rem)]"
         >
           식사 시작
         </Link>
@@ -53,13 +53,13 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-2">
             <Link
               href="/demo"
-              className="tap-pop min-h-12 rounded-full border-[3px] border-[#167f9d] bg-white px-5 py-2.5 text-[clamp(1rem,3vmin,1.2rem)] text-[#167f9d] shadow-[0_3px_0_#9bcfe4]"
+              className="tap-pop btn-tonal min-h-12 rounded-full px-5 py-2.5 text-[clamp(1rem,3vmin,1.2rem)] [--btn:#167f9d]"
             >
               직접 해 보기
             </Link>
             <Link
               href="/demo/auto"
-              className="tap-pop min-h-12 rounded-full border-[3px] border-[#6a4fc4] bg-white px-5 py-2.5 text-[clamp(1rem,3vmin,1.2rem)] text-[#6a4fc4] shadow-[0_3px_0_#cbbdf1]"
+              className="tap-pop btn-tonal min-h-12 rounded-full px-5 py-2.5 text-[clamp(1rem,3vmin,1.2rem)] [--btn:#6a4fc4]"
             >
               자동으로 보기
             </Link>
@@ -68,7 +68,7 @@ export default function Home() {
 
         <Link
           href="/parent"
-          className="tap-pop min-h-11 rounded-full bg-white/80 px-5 py-2.5 text-[#245964] shadow-sm"
+          className="tap-pop btn-plain min-h-11 rounded-full px-5 py-2.5 text-[#245964]"
         >
           보호자 설정
         </Link>

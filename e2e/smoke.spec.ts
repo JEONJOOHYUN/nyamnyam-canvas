@@ -38,6 +38,8 @@ test("auto demo starts with one tap and hides the controls", async ({
   });
   await page.goto("/demo/auto");
   await page.getByRole("button", { name: "시작하기" }).click();
+  // The start overlay (it also says "자동 시연") fades out for a moment before it goes.
+  await expect(page.locator(".start-screen")).toHaveCount(0);
   await expect(page.getByText("자동 시연")).toBeVisible();
   await expect(page.getByRole("progressbar")).toBeVisible();
   await expect(

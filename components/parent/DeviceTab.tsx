@@ -249,7 +249,8 @@ export function DeviceTab({ db }: { db: Db }) {
                 <Button
                   className={cn(
                     pillClass,
-                    removing === d.id && "bg-[#fde7e4] text-[#b42318]",
+                    // `!`: .btn-plain (globals.css) sets the white fill outside Tailwind's layers.
+                    removing === d.id && "bg-[#fde7e4]! text-[#b42318]",
                   )}
                   onClick={() => void remove(d.id)}
                   onBlur={() => setRemoving(null)}

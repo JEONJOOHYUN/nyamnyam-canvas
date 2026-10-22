@@ -139,7 +139,7 @@ export function ScenePreview(props: GardenSceneProps) {
         <Button
           onClick={() => setResting(!resting)}
           aria-pressed={resting}
-          className="absolute bottom-7 right-6 h-16 min-w-40 rounded-full border-2 border-white bg-[#006b86] px-7 font-kid text-xl text-white shadow-[0_4px_0_#004759] hover:bg-[#00556c] sm:bottom-9 sm:right-9"
+          className="btn-solid absolute bottom-7 right-6 h-16 min-w-40 rounded-full border-2 border-white/90 px-7 font-kid text-xl [--btn:#006b86] sm:bottom-9 sm:right-9"
         >
           {resting ? "같이 쉴게" : "배불러요"}
         </Button>

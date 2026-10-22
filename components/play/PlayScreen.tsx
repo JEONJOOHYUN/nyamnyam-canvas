@@ -95,6 +95,26 @@ const baselineStage = ({ settings, carry }: Config) =>
     settings.stageThresholds,
   );
 
+// The start overlay stays this long after the meal starts so it can fade out (.start-leave).
+const START_LEAVE_MS = 240;
+
+// True for a moment after `started` turns on. Set while rendering (not in an effect) so the
+// overlay never disappears for a frame before it fades.
+function useLeaving(started: boolean) {
+  const [leaving, setLeaving] = useState(false);
+  const [was, setWas] = useState(started);
+  if (was !== started) {
+    setWas(started);
+    setLeaving(started);
+  }
+  useEffect(() => {
+    if (!leaving) return;
+    const id = setTimeout(() => setLeaving(false), START_LEAVE_MS);
+    return () => clearTimeout(id);
+  }, [leaving]);
+  return leaving;
+}
+
 // Demo mode (/demo) never touches the parent's account: no settings, no saved meals.
 const dbOf = (demo: boolean) => (demo ? null : getSupabase());
 
@@ -169,6 +189,7 @@ export function PlayScreen({
   const [character, setCharacter] = useState<GardenCharacterKey | null>(null);
   const [theme, setTheme] = useState<GardenThemeKey | null>(null);
   const started = theme !== null;
+  const leavingStart = useLeaving(started);
   // The screen stays on from the first tap on a theme until the page is left.
   useWakeLock(started);
   const canFullscreen = useCanGoFullscreen();
@@ -625,7 +646,7 @@ export function PlayScreen({
               <button
                 type="button"
                 onClick={full}
-                className="tap-pop min-h-14 min-w-36 rounded-full border-2 border-white bg-[#006b86] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#004759] active:translate-y-px"
+                className="tap-pop btn-solid min-h-14 min-w-36 rounded-full border-2 border-white/90 px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] [--btn:#006b86]"
               >
                 배불러요
               </button>
@@ -634,7 +655,7 @@ export function PlayScreen({
               <button
                 type="button"
                 onClick={reset}
-                className="tap-pop min-h-14 min-w-36 rounded-full border-2 border-white bg-[#3f9b3c] px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] text-white shadow-[0_4px_0_#2a6d28] active:translate-y-px"
+                className="tap-pop btn-solid min-h-14 min-w-36 rounded-full border-2 border-white/90 px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] [--btn:#3f9b3c]"
               >
                 {pictureDone || settings.mode === "amount"
                   ? "새 그림 시작"
@@ -658,8 +679,9 @@ export function PlayScreen({
           </button>
         )}
 
-        {!started && auto && (
+        {(!started || leavingStart) && auto && (
           <AutoDemoStart
+            leaving={started}
             onStart={() => {
               if (canFullscreen) enterFullscreen();
               const first = AUTO_ROUNDS[0];
@@ -669,8 +691,9 @@ export function PlayScreen({
           />
         )}
 
-        {!started && !auto && (
+        {(!started || leavingStart) && !auto && (
           <StartScreen
+            leaving={started}
             ready={ready}
             failed={loadFailed}
             onRetry={() => {
