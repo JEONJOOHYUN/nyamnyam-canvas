@@ -1,6 +1,6 @@
 # HANDOFF — 냠냠캔버스 (nyamnyam-canvas)
 
-## 마지막 업데이트: 2026-10-17
+## 마지막 업데이트: 2026-10-22
 
 ## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1`
 
@@ -12,7 +12,7 @@
 - **방금 끝낸 것(dev·main 모두 반영)**: ① 홈 화면(`app/page.tsx`)을 아이 시작 화면과 같은 모양으로 — 배경·통통 제목은 `components/play/StartDecor.tsx`(`StartDecor`, `BouncyTitle`, 시작 화면과 공유), 세 친구 흔들림(`start.css` `.home-friend`), 버튼: 식사 시작 / 저울 없이 체험해 보기(직접 해 보기 `/demo`, 자동으로 보기 `/demo/auto`) / 보호자 설정. ② **자동 시연 `/demo/auto`**(사용자 요청: 시연장에 켜 두기): "시작하기" 한 번(소리·전체화면 허용용) → 냠냠이·우체국 → 퐁당이·바다 → 반짝이·우주를 끝없이 반복. `components/play/autoDemo.ts`(`AUTO_ROUNDS`, `AUTO_TIMING`, `useAutoMeal` — 시뮬레이터에 시간표대로 무게: 빈 식판 5.5초 → 200g 담기 6.5초 → 2.2초마다 10g → 끝나고 11초 축하 뒤 다음 판), `AutoDemoStart.tsx`(시작 탭 화면), `PlayScreen` `auto` prop(시뮬레이터 패널·배불러요·새 그림 버튼 숨김, 칩 "자동 시연", 페이지를 떠나면 시작 탭으로 초기화 — Codex 지적: cacheComponents 로 식사 상태가 남아 어긋났음). 한 판 약 56초(0→100%) + 축하, 2판째 퐁당이·바다 확인. e2e 24개(자동 시연 추가) 통과.
 - **2026-10-17 사용자 요청으로 main 합침**(`21cbd2c`, 팀원 시연용) → https://nyamnyam-canvas.vercel.app 에서 `/`·`/demo`·`/demo/auto`·`/play`·`/parent` 200, 자동 시연 한 판 100%·재방문 초기화 확인. dev 와 main 같은 커밋.
 - Codex 리뷰: 자동 시연 1회 지적 1건 반영(재방문 초기화). 반영이 작아 다시 리뷰는 생략(규칙상 허용, 사용자에게 알림).
-- 그다음 남은 것: 부품 도착 후 펌웨어 컴파일·실기기(`docs/FIRMWARE_NOTES.md` §7). 주황 버튼 색은 유지로 결정됨.
+- **2026-10-20 부품 도착(실기기 작업은 2026-10-21부터)**: 개발 환경 설치 + 펌웨어 첫 컴파일 성공(코드 변경 없음, 설치 목록 `docs/FIRMWARE_NOTES.md` §7-3). 다음: §7 의 기기 등록 → `secrets.h` → 업로드 → 시리얼 → 보정 → 웹 연결. 주황 버튼 색은 유지로 결정됨.
 
 ## 현재 상태 (2026-10-17)
 
@@ -35,7 +35,7 @@
    - `scripts/fake-scale.mjs`(2026-10-17 추가): 등록한 저울 ID·키로 펌웨어처럼 `device-ingest` 에 무게를 보내고 명령에 답하는 가짜 저울(`FAKE_SCALE_ID=… FAKE_SCALE_KEY=… node scripts/fake-scale.mjs`, 그램 입력·`r` 재부팅·`q` 종료).
 2. ~~배포~~ **2026-10-17 완료**: 사용자 결정으로 `dev`→`main` fast-forward(29커밋, `e2812ce`) → Vercel Production https://nyamnyam-canvas.vercel.app (로그인 없이 공개, 개발용 `/design/*` 은 404). Supabase Redirect URLs 에 `https://nyamnyam-canvas.vercel.app/**` 추가(Site URL 은 메이플과 같이 쓰는 프로젝트라 그대로). 실제 사이트에서 홈 링크 3개·`/demo` 시뮬레이터 패널·`/parent` 로그인 화면(Supabase 연결)·`/play` 패널 숨김·PWA 태그 확인. 앞으로도 평소 작업은 `dev`, `main` 합치기는 사용자 확인 후.
 3. ~~실제 계정 확인~~ **2026-10-17 완료**(사용자가 Preview 에서 가입·로그인·PIN·아이 "안양우" 추가까지 해 둔 뒤 Claude 가 확인): 식사 기록 빈 화면 → `/play` 시뮬레이터로 200g 중 150g(75%) 먹고 배불러요 → 저장 대기열 비움·도장판 토요일 도장·14일 막대 150g 확인(그림은 95% 미만이라 0장, 정상). 저울 탭에서 "테스트 저울" `nyam-c3ezdf` 등록 → 가짜 저울로 실제 Edge Function 에 무게 전송 → 보정 마법사 "연결됨 · 지금 0.5g", 영점·보정 명령 왕복, ±5g 통과, 목록 "방금 연결됐어요 · 보정함", `/play` "저울 연결됨"·45% 까지 진행, 저울 끄면 3초 뒤 "저울을 기다리고 있어요". **실제 DB 에 남은 확인 데이터**: 식사 1건(150g, 도장 1개), 테스트 저울 1대(사용자가 지워도 됨 — 저울 탭 "삭제" 두 번), 끝내지 않은 식사는 저장 안 됨. 그 브라우저의 저울 선택(localStorage)은 원래대로(시뮬레이터) 되돌림.
-4. **부품 도착 후**: 펌웨어 컴파일(이 PC 에 Arduino IDE 없음)·실기기 확인 — 순서는 `docs/FIRMWARE_NOTES.md` §7.
+4. **부품 도착(2026-10-20)**: 컴파일 확인 완료 → 실기기 확인 — 순서는 `docs/FIRMWARE_NOTES.md` §7.
 5. 음성 남은 것: 개발 모드 "음성 점검" 화면, '만든 사람들' 화면 출처 표기(화면 아직 없음).
 
 ## 다시 시작할 때
@@ -83,6 +83,8 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - 공개 저장소라 커밋에 `Co-Authored-By` 넣어도 됨(Vercel Hobby 차단은 비공개 저장소만).
 
 ## 주요 설계 결정과 이유
+
+- **버튼 모양·누름·시작 화면 전환** (2026-10-22, 사용자 피드백 "옛날 버튼 같다"·"누르면 밋밋하다"·"장면 애니메이션이 없다" + Codex 의견): `app/globals.css` 공용 클래스 `.btn-solid`(색 채움, 흰 두꺼운 테두리·딱딱한 아래 그림자 대신 버튼색 30% 의 부드러운 그림자 + 위쪽 1px 하이라이트) / `.btn-tonal`(옅은 색 바탕, 글자는 --btn 을 15% 어둡게 해 대비 4.5 유지) / `.btn-plain`(흰 보조, 그림자 더 약하게). 색은 요소에 `[--btn:#…]`(기본값은 `@layer base` 에 둬야 Tailwind 값이 이김 — 레이어 밖에 두면 모든 버튼이 주황이 됐음). 이 클래스들은 레이어 밖이라 Tailwind 의 bg·shadow 를 덮으니, 상태별 바탕색을 바꿀 땐 `bg-…!`(예: 저울 삭제 확인). 누름: `.tap-pop` 0.94·튀어 오름 240ms + 주요 버튼은 손을 떼면 같은 색 고리가 퍼짐(box-shadow 전환, 전역 스크립트 없음 — Codex: 물결+말랑 눌림 전부는 과함). 장면: 시작 화면 단계(친구→세계)마다 질문·카드가 40ms 간격으로 올라옴(`.step-in`, 단계별 `Fragment key`), 세계를 고르면 시작 화면이 240ms 페이드아웃(`PlayScreen` `useLeaving` + `.start-leave`, 그동안 `inert`, reduced-motion 이면 바로 사라짐). 페이지 전체 전환(View Transitions)은 넣지 않음(Codex: 식탁에서 존재감이 큼, 체감 부족하면 나중에 150~200ms 크로스페이드부터). 정원 위 버튼(배불러요·새 그림)은 바다 등 배경 대비 때문에 얇은 흰 테두리 유지. 주황 색은 그대로.
 
 - **기기 재부팅 처리** (2026-10-17): 펌웨어는 부팅마다 seq 1·millis() 부터(부팅 카운터·NTP 없음). 웹 `lib/weight/guard.ts` 가 2초 이상 조용한 뒤 작은 seq 를 재부팅으로 받아들이고 ts 를 이어 붙인다 → 식사 상태 머신은 시간이 뒤로 가는 걸 보지 않는다. 펌웨어를 단순하게 두고 판단은 웹에서.
 - **명령은 무게 전송 응답으로 받는다** (2026-10-17): `device-ingest` 응답에 대기 명령을 실어 보내서 따로 1초 polling 하지 않는다(무게를 최소 1초마다 보내므로 같은 효과, 요청 수 절반). `device-commands` 는 결과 보고 + 무게를 안 보낼 때의 polling. 명령 만료는 만든 시각 기준 12초 하나(서버 `expiresInMs` → 기기는 요청 보낸 시각부터 계산), 부모 화면은 15초 기다림.
@@ -132,11 +134,11 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - Playwright 브라우저는 chromium만 설치. 기기 6종 모두 chromium 뷰포트로 흉내 낸다(실제 Safari 아님).
 - Supabase SQL 편집기 탭에 저장 안 된 쿼리가 있으면 다른 페이지로 갈 때 "사이트에서 나가시겠습니까?" 가 떠 Claude in Chrome 이 멈춘다 → 새 탭에서 작업하고, 남은 탭은 사용자에게 "나가기" 를 부탁.
 - **백그라운드로 띄운 `npm run dev`·`next start` 를 TaskStop 해도 자식 node 가 포트를 잡고 남는다**(2026-10-17, 그래서 옛 코드를 계속 서빙 — 메타데이터·CSS 가 안 바뀐 것처럼 보였음). PowerShell `Get-NetTCPConnection -LocalPort <포트> -State Listen` 으로 PID 를 찾아 `Stop-Process`. 화면 변경이 안 보이면 먼저 이걸 의심.
-- 펌웨어는 컴파일해 본 적 없음(이 PC 에 Arduino IDE·arduino-cli 없음). 부품이 오면 가장 먼저 컴파일 확인.
+- HX711 라이브러리는 **"HX711 Arduino Library"**(Bogdan Necula). 라이브러리 매니저에서 그냥 "HX711" 을 고르면 다른 저자(Rob Tillaart) 것이라 API 가 다르다. Arduino IDE 는 winget 압축판이라 바로가기를 직접 만들어 둠(2026-10-20).
 
 ## 펌웨어 연동 상태
 
-- 2026-10-17 펌웨어 작성(`firmware/nyamnyam/nyamnyam.ino` + `secrets.example.h`, 컴파일·실기기 확인 전), Edge Function 2개·DB 0003 Supabase 적용 완료. 계약·명령·실패 코드·테스트 절차는 [docs/FIRMWARE_NOTES.md](docs/FIRMWARE_NOTES.md).
+- 2026-10-17 펌웨어 작성(`firmware/nyamnyam/nyamnyam.ino` + `secrets.example.h`, 2026-10-20 컴파일 확인, 실기기 확인 전), Edge Function 2개·DB 0003 Supabase 적용 완료. 계약·명령·실패 코드·테스트 절차는 [docs/FIRMWARE_NOTES.md](docs/FIRMWARE_NOTES.md).
 
 ## 파일 구조 지도
 
@@ -167,3 +169,6 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - 2026-10-15: 정원 시안 Codex v4~v7 → `/play` 연결, Vercel 연결, D2Coding, 5단계 테마 3종·캐릭터 3종·시작 화면(`f9e3452`).
 - 2026-10-16: 6단계 부모 설정·식사 저장, ElevenLabs 음성, 부품 동시 등장, 빵 처리 넣었다 되돌림, 부모 화면 A안.
 - 2026-10-17: 7단계 기기 연동 준비 + Supabase 적용·Edge Function 배포, Vercel 환경변수, HANDOFF 정리(지난 과정은 `docs/HISTORY.md`).
+- 2026-10-20: 부품 도착. Arduino CLI·IDE·esp32 코어·라이브러리 설치, 펌웨어 첫 컴파일 성공(세 설정 조합). 브레드보드 배선도(비공개 아티팩트, git 밖 원본 — 위치는 루트 handoff). 사용자 확인: 로드셀 5kg, 버튼·LED 없음 유지, 브레드보드 사용.
+- 2026-10-22: 버튼 새 모양·누름 고리·시작 화면 단계 등장/퇴장 애니메이션(Codex 의견 반영, 리뷰 지적 없음). e2e 자동 시연 테스트는 시작 화면이 사라질 때까지 기다리게 고침.
+- 2026-10-22: 전시용 A3 포스터 시안 3종(git 밖, 위치는 루트 handoff). `/design/garden?theme=&character=` 를 1180×820 @2x 로 찍어 태블릿 목업에 씀.

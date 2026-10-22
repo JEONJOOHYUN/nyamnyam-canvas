@@ -1,7 +1,7 @@
 # FIRMWARE_NOTES — 부품 코드 작성 시 참고사항
 
 > 웹에서 기기와 관련된 부분(타입, API, 명령, 필터 기준, 상태 머신)을 바꾸면 이 파일도 같이 고친다.
-> 펌웨어: `firmware/nyamnyam/nyamnyam.ino` (2026-10-16 7단계 작성). 부품이 아직 없어 **실기기·컴파일 확인 전**이다(이 PC 에 Arduino IDE·arduino-cli 없음). 부품이 오면 §7 순서로 확인하고 이 문서를 고친다.
+> 펌웨어: `firmware/nyamnyam/nyamnyam.ino` (2026-10-16 7단계 작성). **2026-10-20 컴파일 확인**(arduino-cli 1.5.1, esp32 코어 3.3.12, 기본·`LOCAL_WS 1`·`LOCAL_WS 1`+`USE_SUPABASE 0` 세 조합 모두 스케치 경고·오류 없음, 플래시 78~81%). **실기기 확인 전** — 부품이 오면 §7 순서로 확인하고 이 문서를 고친다.
 
 ## 1. 하드웨어 사양과 배선
 
@@ -148,7 +148,8 @@ DB: `supabase/migrations/0003_devices.sql` (`devices`, `device_state`, `device_c
 
 1. **Supabase 준비(한 번)** — 2026-10-17 완료(0003 실행, 두 함수 배포·JWT 검사 끔). 다시 할 때: SQL 편집기에서 `supabase/migrations/0003_devices.sql` 실행 → `npx supabase login` → `npx supabase functions deploy device-ingest --project-ref <ref> --no-verify-jwt`, `device-commands` 도 같이(또는 대시보드 편집기에 세 파일을 한 폴더로, import 는 `./`).
 2. **기기 등록**: 부모 화면 > 저울 > 저울 등록하기 → 보이는 세 줄을 `firmware/nyamnyam/secrets.h` 에(`secrets.example.h` 복사), Wi-Fi 이름·비밀번호도.
-3. **업로드**: Arduino IDE, 보드 "ESP32 Dev Module", 라이브러리 HX711(Bogdan Necula)·ArduinoJson 7.x. 시리얼 115200.
+3. **업로드**: Arduino IDE, 보드 "ESP32 Dev Module", 라이브러리 **"HX711 Arduino Library"**(Bogdan Necula — 이름이 그냥 "HX711" 인 것은 Rob Tillaart 의 다른 라이브러리)·ArduinoJson 7.x. 시리얼 115200. 보드를 꽂아도 COM 포트가 안 보이면 USB 칩(CP210x / CH340·CH9102)에 맞는 드라이버 설치.
+   - 이 PC 설치 상태(2026-10-20): arduino-cli 1.5.1(`C:Program FilesArduino CLI`), Arduino IDE 2.3.10(winget, 시작 메뉴·바탕화면 바로가기), esp32 코어 3.3.12, HX711 Arduino Library 0.7.5, ArduinoJson 7.4.3, WebSockets 2.7.2. 명령줄: `arduino-cli compile --fqbn esp32:esp32:esp32 firmware/nyamnyam` → `arduino-cli upload -p COM<n> --fqbn esp32:esp32:esp32 firmware/nyamnyam` → `arduino-cli monitor -p COM<n> -c baudrate=115200`.
 4. **시리얼 확인**: 부팅 메시지 → `p` 로 무게·안정·Wi-Fi 확인. 처음 부팅은 저울 위를 비운 채로(빈 저울에서 영점 자동).
 5. **보정**: 부모 화면 > 저울 > 보정하기(빈 저울 영점 → 500ml 생수 510g 보정 → 한 번 내렸다가 다시 올려 ±5g, 보정 뒤에 새로 잰 값만 인정). 시리얼만으로는 `t` → 물건 올리고 `c 510`.
 6. **웹 연결**: 부모 화면 "이 화면은 어떤 저울을 쓸까요?"에서 저울 고르기 → 아이 화면 왼쪽 위가 "저울 연결됨", 전원을 뽑으면 3초 뒤 "저울을 기다리고 있어요", 다시 꽂으면 이어서.
@@ -173,4 +174,5 @@ DB: `supabase/migrations/0003_devices.sql` (`devices`, `device_state`, `device_c
 | 2026-10-16 | 7단계: Edge Function `device-ingest`·`device-commands` 계약(§3), 명령 결과·실패 코드(§4), 재부팅 시 seq·ts 처리(웹이 2초 침묵 뒤 작은 seq 를 재부팅으로 받음, §2), 펌웨어 작성, 테스트 절차(§7) | 펌웨어 새로 작성됨 — 실기기에서 §7 확인 |
 | 2026-10-16 | 위 손에 든 음식 처리를 되돌림(졸업 프로젝트 범위에서 제외). 상태 머신은 다시 "안정값 감소 = 먹은 양" + 리필·쏟음 판단만 | 없음 |
 | 2026-10-16 | 식사 상태 머신(웹): 손으로 들고 먹는 음식 처리 — 2초 안 30g 이상 감소는 보류(`heldG`), 다시 올려놓으면 차이만 먹은 양, 60초 뒤 자동 인정(`lib/meal/machine.ts` `HAND_*`, `RETURN_WINDOW_MS`) | 없음. 펌웨어는 지금처럼 안정값·`stable` 만 보내면 된다(판단은 웹) |
+| 2026-10-20 | 개발 환경 설치, 첫 컴파일 성공(코드 변경 없음). §7-3 라이브러리 정확한 이름·설치 상태 | 없음 |
 | 2026-10-14 | 2단계: `WeightReading`·`DeviceCommand` 타입, 공유 상수, 필터·전송 규칙 확정(`lib/weight/`). 영점은 빈 저울 기준으로 결정 | 펌웨어 작성 시 §2·§4·§5·§6 그대로 구현. seq 재부팅 문제 결정 필요 |
