@@ -148,7 +148,7 @@ export function GardenScene({
               role: "button",
               tabIndex: 0,
               "aria-label": name,
-              className: "cursor-pointer",
+              className: "chick-tap cursor-pointer",
               onClick: onChickTap,
               onKeyDown: (event: KeyboardEvent) => {
                 if (event.key === "Enter" || event.key === " ") onChickTap();

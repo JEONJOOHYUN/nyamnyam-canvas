@@ -148,6 +148,16 @@
   }
 }
 
+/* Tappable character: the browser's focus ring on an SVG group is a square box round it, which
+   showed on every tap. No ring; keyboard focus glows along the character's shape instead. */
+.chick-tap {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.chick-tap:focus-visible {
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 3px #006b86);
+}
+
 /* Nyamnyam: pose changes blend through one soft overshoot curve; loops add life. */
 .chick-move {
   transform-box: view-box;
