@@ -40,7 +40,9 @@ describe("additive scene growth", () => {
     }
   });
 
-  it("lands a complete house by 33 percent and adds complete telescope and boat assemblies", () => {
+  it("lands a complete house with its stage cheer and adds complete telescope and boat assemblies", () => {
+    const at = (key: string) =>
+      GROWTH_PIECES.find((piece) => piece.key === key)!.at;
     const markupAt = (progress: number) =>
       renderToStaticMarkup(
         createElement(GardenScene, {
@@ -50,7 +52,7 @@ describe("additive scene growth", () => {
           bubble: null,
         }),
       );
-    const house = markupAt(0.33);
+    const house = markupAt(at("house"));
     for (const part of [
       "wall-left",
       "wall-right",
@@ -62,15 +64,17 @@ describe("additive scene growth", () => {
       "step-6",
     ]) {
       expect(house).toContain(`data-building-part="${part}"`);
-      expect(markupAt(0.329)).not.toContain(`data-building-part="${part}"`);
+      expect(markupAt(at("house") - 0.001)).not.toContain(
+        `data-building-part="${part}"`,
+      );
     }
-    for (const [at, parts] of [
-      [0.69, ["scope-deck", "scope-post", "scope-tube", "scope-lens"]],
-      [0.81, ["boat-hull", "boat-mast", "sail-small", "sail-big"]],
+    for (const [key, parts] of [
+      ["telescope", ["scope-deck", "scope-post", "scope-tube", "scope-lens"]],
+      ["boat", ["boat-hull", "boat-mast", "sail-small", "sail-big"]],
     ] as const) {
       for (const part of parts) {
-        expect(markupAt(at)).toContain(`data-building-part="${part}"`);
-        expect(markupAt(at - 0.001)).not.toContain(
+        expect(markupAt(at(key))).toContain(`data-building-part="${part}"`);
+        expect(markupAt(at(key) - 0.001)).not.toContain(
           `data-building-part="${part}"`,
         );
       }
@@ -118,8 +122,8 @@ describe("additive scene growth", () => {
           bubble: null,
         }),
       );
-    expect(renderAt(0.06)).toContain("transform:translate(-7px, 6px)");
-    expect(renderAt(0.09)).toContain("transform:translate(7px, -6px)");
+    expect(renderAt(0.0676)).toContain("transform:translate(-7px, 6px)");
+    expect(renderAt(0.1052)).toContain("transform:translate(7px, -6px)");
   });
 
   it("renders the cumulative piece list without masks or changing earlier geometry", () => {
@@ -186,7 +190,23 @@ describe("additive scene growth", () => {
         byKey("mailbox-flag")[layout][1],
       );
     }
-    expect(visiblePieces(0.09).map(({ key }) => key)).toContain(
+    // Attached pieces only ever arrive after what they hang on.
+    for (const [part, support] of [
+      ["boat", "pond"],
+      ["reeds", "pond"],
+      ["garland", "house"],
+      ["letter-sign", "house"],
+      ["round-window", "house"],
+      ["letter-chute", "house"],
+      ["chimney", "house"],
+      ["smoke", "chimney"],
+      ["parcel", "house"],
+      ["lanterns", "house"],
+      ["mailbox-flag", "mailbox"],
+      ["balloons", "mailbox-flag"],
+    ])
+      expect(byKey(part).at).toBeGreaterThan(byKey(support).at);
+    expect(visiblePieces(0.1052).map(({ key }) => key)).toContain(
       "flying-letter",
     );
   });

@@ -171,14 +171,15 @@ it("renders the default theme exactly like explicit post", () => {
   }
 });
 
-it("lands a complete shell palace at 33 percent and attaches its later additions", () => {
+it("lands a complete shell palace with its stage cheer and attaches its later additions", () => {
   const parts = ["towers", "walls", "shell-roof", "door", "window", "step"];
+  const at = THEMES.sea.events.find(({ key }) => key === "palace")!.at;
   for (const layout of ["wide", "tall"] as const) {
     for (const part of parts) {
-      expect(render({ theme: "sea", layout, progress: 0.329 })).not.toContain(
-        `data-building-part="palace-${part}"`,
-      );
-      expect(render({ theme: "sea", layout, progress: 0.33 })).toContain(
+      expect(
+        render({ theme: "sea", layout, progress: at - 0.001 }),
+      ).not.toContain(`data-building-part="palace-${part}"`);
+      expect(render({ theme: "sea", layout, progress: at })).toContain(
         `data-building-part="palace-${part}"`,
       );
     }
@@ -195,7 +196,9 @@ it("lands a complete shell palace at 33 percent and attaches its later additions
     ] as const) {
       expect(event(key)[layout][0]).toBeCloseTo(palace[0] + x * scale);
       expect(event(key)[layout][1]).toBeCloseTo(palace[1] + y * scale);
+      expect(event(key).at).toBeGreaterThan(at);
     }
+    expect(event("tower-pennant").at).toBeGreaterThan(event("crown-tower").at);
     expect(event("pearl-arch")[layout]).toEqual(palace);
     expect(event("whale-finale")[layout]).toEqual(palace);
   }

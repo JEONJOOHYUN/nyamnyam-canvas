@@ -15,17 +15,16 @@ const render = (progress: number, layout: "wide" | "tall") =>
     }),
   );
 
-it("lands a complete dome base at 33 percent with attached decorations", () => {
+it("lands a complete dome base with its stage cheer and attaches its decorations after it", () => {
   const event = (key: string) =>
     THEMES.space.events.find((piece) => piece.key === key)!;
+  const at = event("dome-base").at;
   for (const layout of ["wide", "tall"] as const) {
     for (const part of ["feet", "dome", "rim", "door", "windows", "antenna"]) {
-      expect(render(0.329, layout)).not.toContain(
+      expect(render(at - 0.001, layout)).not.toContain(
         `data-building-part="base-${part}"`,
       );
-      expect(render(0.33, layout)).toContain(
-        `data-building-part="base-${part}"`,
-      );
+      expect(render(at, layout)).toContain(`data-building-part="base-${part}"`);
     }
     const base = event("dome-base")[layout];
     const scale = layout === "tall" ? 0.86 : 1;
@@ -38,6 +37,7 @@ it("lands a complete dome base at 33 percent with attached decorations", () => {
     ] as const) {
       expect(event(key)[layout][0]).toBeCloseTo(base[0] + x * scale);
       expect(event(key)[layout][1]).toBeCloseTo(base[1] + y * scale);
+      expect(event(key).at).toBeGreaterThan(at);
     }
   }
 });
@@ -51,6 +51,9 @@ it("assembles the rocket before its astronaut and adds ignition only at 100 perc
     "rocket-fins",
     "rocket-nose",
   ]);
+  expect(rocket[0].at).toBeGreaterThan(
+    events.find(({ key }) => key === "landing-pad")!.at,
+  );
   expect(rocket.at(-1)!.at).toBeLessThan(
     events.find(({ key }) => key === "alien-astronaut")!.at,
   );

@@ -12,7 +12,7 @@ import {
 } from "react";
 import type { GardenCharacterKey } from "@/components/garden/characters";
 import { GardenScene, type ChickPose } from "@/components/garden/GardenScene";
-import type { GardenThemeKey } from "@/components/garden/themes";
+import { THEMES, type GardenThemeKey } from "@/components/garden/themes";
 import { visiblePieces } from "@/components/garden/growth";
 import { pickLine, type LineKey } from "@/content/lines";
 import { sfx, unlockAudio } from "@/lib/audio/sfx";
@@ -22,6 +22,7 @@ import { setVoiceVolume } from "@/lib/audio/voice";
 import {
   initialMealState,
   mealReducer,
+  NEAR_ZERO_G,
   type MealEvent,
   type MealState,
 } from "@/lib/meal/machine";
@@ -33,7 +34,12 @@ import {
   stageProgress,
   type PictureCarry,
 } from "@/lib/meal/picture";
-import { shouldPromptIdle, STAGE_COUNT, stageFor } from "@/lib/meal/stage";
+import {
+  sceneFor,
+  shouldPromptIdle,
+  STAGE_COUNT,
+  stageFor,
+} from "@/lib/meal/stage";
 import {
   loadPlayConfig,
   loadUnsaved,
@@ -208,6 +214,10 @@ export function PlayScreen({
   const pick = useRef(0);
   const prevStage = useRef(0);
   const idle = useRef({ changedAt: 0, promptAt: 0, count: 0 });
+  // The "resting" line while the tray is up, and the turn right after it (any later line moves it).
+  const pauseLine = useRef<{ said: Promise<boolean>; turn: number } | null>(
+    null,
+  );
   const servedAt = useRef(0);
   // Applied on "new meal", never while the finished meal is still on screen.
   const pendingCarry = useRef<PictureCarry | null>(null);
@@ -302,10 +312,13 @@ export function PlayScreen({
     setVoiceVolume(settings.voiceVolume);
   }, [settings.sfxVolume, settings.voiceVolume]);
 
-  // The scene finishes at the last stage threshold, when the completion cheer plays.
+  // Each stage cheer lands with the piece it names; the scene finishes at the last threshold.
   // Point at each newly added piece for a moment (adjusting state during render, no effect).
-  const sceneProgress = Math.min(1, (staged * 100) / lastThreshold(settings));
-  const pieceCount = visiblePieces(sceneProgress).length;
+  const sceneProgress = sceneFor(staged, thresholds);
+  const pieceCount = visiblePieces(
+    sceneProgress,
+    THEMES[theme ?? "post"].events,
+  ).length;
   const [seenPieces, setSeenPieces] = useState(pieceCount);
   const [pointing, setPointing] = useState(false);
   if (pieceCount !== seenPieces) {
@@ -357,9 +370,13 @@ export function PlayScreen({
     !started || !greeted
       ? null
       : meal.phase === "EMPTY_TRAY"
-        ? meal.trayG === null
-          ? "trayEmpty"
-          : "trayFood"
+        ? meal.trayG !== null
+          ? "trayFood"
+          : // Only ask for the tray while the scale is empty: one already on it is still
+            // being weighed (3s hold), and asking would be cut off by "trayFood".
+            reading && reading.grams <= NEAR_ZERO_G
+            ? "trayEmpty"
+            : null
         : meal.phase === "SERVED"
           ? "serve"
           : null;
@@ -464,7 +481,20 @@ export function PlayScreen({
   }, [meal.phase, stampEarned, meal.endedBy]);
 
   useEffect(() => {
-    if (meal.lifted) void say("pause");
+    if (meal.lifted) {
+      const said = say("pause");
+      pauseLine.current = { said, turn: turn.current };
+      return;
+    }
+    const resting = pauseLine.current;
+    if (!resting) return;
+    pauseLine.current = null;
+    // Tray back: the quiet spell starts over (lifted time is not idle time), and the
+    // "resting" bubble goes once it has been said, unless another line took its place.
+    idle.current.changedAt = Date.now();
+    void resting.said.then(() => {
+      if (turn.current === resting.turn) setBubble(null);
+    });
   }, [meal.lifted, say]);
 
   // Gentle prompts after a quiet spell, capped per meal so it never nags.
@@ -502,6 +532,8 @@ export function PlayScreen({
     unlockAudio();
     sfx.tap();
     setCharacter(chosen);
+    // The tray guide waits for this greeting (the auto demo picks again with one done).
+    setGreeted(false);
     // Greet in the chosen voice right inside the tap, which also unlocks speech on iOS.
     const line = pickLine(chosen, "hello");
     setBubble(line.text);

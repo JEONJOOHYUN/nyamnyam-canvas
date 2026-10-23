@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { THEMES, type GardenThemeKey } from "@/components/garden/themes";
 import { GardenScene } from "@/components/garden/GardenScene";
 import { CHICK_POSES, POSE_LABELS } from "@/components/garden/Chick";
+import { DEFAULT_STAGE_THRESHOLDS, sceneFor } from "@/lib/meal/stage";
 import {
   BuildPreview,
   PoseLoop,
@@ -46,10 +47,11 @@ async function DesignGallery({ searchParams }: { searchParams: SearchParams }) {
         ? "banjjak"
         : "nyamnyam";
   const { Component: Character, name } = CHARACTERS[character];
-  const checkpoints =
-    theme !== "post"
-      ? [0, 0.09, 0.18, 0.27, 0.33, 0.45, 0.55, 0.64, 0.73, 0.82, 0.99, 1]
-      : [0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.55, 0.64, 0.73, 0.82, 0.91, 1];
+  // The scene at each stage cheer (default thresholds): the cheered piece has just landed.
+  const checkpoints = [
+    0,
+    ...DEFAULT_STAGE_THRESHOLDS.map((t) => sceneFor(t / 100)),
+  ];
   return (
     <main className="bg-[#edfbff] text-[#245964]">
       {(

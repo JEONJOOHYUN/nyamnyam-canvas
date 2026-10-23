@@ -150,6 +150,6 @@ it("preserves the pre-character default scene markup", () => {
   );
   const hash = createHash("sha256").update(renders.join("\n")).digest("hex");
   expect(hash).toBe(
-    "b77dc84f35a7ab6c5126a741c9d8607f8e98b1662d9f7814ed9a2574352ccdd8",
+    "a727afb8918ac300fe102da1a606213debdf4f2dc8ec599513ef21e6e10879da",
   );
 });

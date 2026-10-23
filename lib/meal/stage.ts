@@ -10,6 +10,28 @@ export function stageFor(
   return thresholds.filter((t) => progress * 100 >= t).length;
 }
 
+// Scene progress (0..1) for stage progress under the parent's thresholds. Every theme puts the
+// piece a stage cheer names exactly where the default thresholds land (components/garden),
+// so map threshold k onto default threshold k, linearly in between: the cheer and its piece
+// arrive together whatever the thresholds are. With the defaults this is progress / 95%.
+export function sceneFor(
+  progress: number,
+  thresholds: number[] = DEFAULT_STAGE_THRESHOLDS,
+): number {
+  const pct = progress * 100;
+  const from = [0, ...thresholds];
+  const to = [0, ...DEFAULT_STAGE_THRESHOLDS];
+  for (let k = 1; k < from.length; k++)
+    if (pct < from[k])
+      return (
+        (to[k - 1] +
+          ((pct - from[k - 1]) / (from[k] - from[k - 1])) *
+            (to[k] - to[k - 1])) /
+        to[to.length - 1]
+      );
+  return 1;
+}
+
 export const DEFAULT_IDLE_SECONDS = 30;
 export const DEFAULT_IDLE_MAX_PROMPTS = 3;
 
