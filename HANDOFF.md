@@ -13,6 +13,7 @@
 - **2026-10-17 사용자 요청으로 main 합침**(`21cbd2c`, 팀원 시연용) → https://nyamnyam-canvas.vercel.app 에서 `/`·`/demo`·`/demo/auto`·`/play`·`/parent` 200, 자동 시연 한 판 100%·재방문 초기화 확인. dev 와 main 같은 커밋.
 - Codex 리뷰: 자동 시연 1회 지적 1건 반영(재방문 초기화). 반영이 작아 다시 리뷰는 생략(규칙상 허용, 사용자에게 알림).
 - **2026-10-20 부품 도착(실기기 작업은 2026-10-21부터)**: 개발 환경 설치 + 펌웨어 첫 컴파일 성공(코드 변경 없음, 설치 목록 `docs/FIRMWARE_NOTES.md` §7-3). 다음: §7 의 기기 등록 → `secrets.h` → 업로드 → 시리얼 → 보정 → 웹 연결. 주황 버튼 색은 유지로 결정됨.
+- **2026-10-23 실기기 첫 업로드 성공**: COM4(CP2102N), Wi-Fi 칸을 비운 `secrets.h` 로 업로드 → 첫 부팅 영점(offset 170635), 빈 상태 ±0.3g, 로드셀 끝을 누르면 −3~−10g(기본 factor 420, 보정 전이라 부호 반대 — 보정이 부호까지 계산하므로 배선 그대로). 다음: 사용자가 저울 등록 → `secrets.h` 에 세 줄 + 2.4GHz Wi-Fi → 다시 업로드 → 로드셀 고정 → 부모 화면 보정 → 웹 연결(§7-5·6).
 
 ## 현재 상태 (2026-10-17)
 
@@ -142,7 +143,7 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 
 ## 펌웨어 연동 상태
 
-- 2026-10-17 펌웨어 작성(`firmware/nyamnyam/nyamnyam.ino` + `secrets.example.h`, 2026-10-20 컴파일 확인, 실기기 확인 전), Edge Function 2개·DB 0003 Supabase 적용 완료. 계약·명령·실패 코드·테스트 절차는 [docs/FIRMWARE_NOTES.md](docs/FIRMWARE_NOTES.md).
+- 2026-10-17 펌웨어 작성(`firmware/nyamnyam/nyamnyam.ino` + `secrets.example.h`, 2026-10-20 컴파일 확인, 2026-10-23 실기기 업로드·센서 반응 확인, Wi-Fi·보정·웹 연결은 아직), Edge Function 2개·DB 0003 Supabase 적용 완료. 계약·명령·실패 코드·테스트 절차는 [docs/FIRMWARE_NOTES.md](docs/FIRMWARE_NOTES.md).
 
 ## 파일 구조 지도
 
@@ -179,3 +180,4 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - 2026-10-22: 사용자 결정으로 `dev`→`main` fast-forward(`151c177..ba609c7`) → 실제 사이트에 새 버튼·시작 화면 애니메이션 반영(배포된 CSS 에 `btn-solid` 확인, `/`·`/demo/auto` 200, `/design/*` 404 그대로).
 - 2026-10-23: Next.js 16.4.2 보안 업그레이드. 대사 타이밍 점검(자동·손 시연 재생 순서 기록) → 빈 식판 안내·두 번째 친구 인사·쉬는 중 말풍선·무반응 시간 고침, 단계 칭찬을 그림 등장 순간에 맞춤(세 세계 조각 재배치, `sceneFor`). Codex 리뷰 지적 1건 반영.
 - 2026-10-23: 정원 캐릭터를 누르면 뜨던 네모 박스 제거(사용자 요청). SVG `<g role=button tabIndex=0>` 에 크롬이 그리던 포커스 테두리였음 → `.chick-tap`(garden.css) 으로 테두리·탭 하이라이트 없앰, 키보드 포커스일 때만 캐릭터 모양을 따라 빛남(drop-shadow). `characters.test.ts` 마크업 해시는 클래스 추가만 반영해 갱신(클래스 빼면 옛 해시 통과 확인). 사용자 요청으로 main 에도 합쳐 실제 사이트 반영(배포 CSS 에 `chick-tap` 확인).
+- 2026-10-23: 실기기 첫 연결. 처음 두 케이블은 충전 전용(LED·휴대폰 충전은 되는데 장치 관리자에 아무것도 안 뜸) → 로지텍 마우스 케이블로 인식, CP210x 드라이버는 사용자가 설치. 보드 회로도(하이제니스 GitHub) 확인 내용은 FIRMWARE_NOTES §1. 업로드·시리얼·누름 반응 확인.
