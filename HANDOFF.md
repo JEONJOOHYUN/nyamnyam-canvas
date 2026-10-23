@@ -173,4 +173,4 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - 2026-10-22: 버튼 새 모양·누름 고리·시작 화면 단계 등장/퇴장 애니메이션(Codex 의견 반영, 리뷰 지적 없음). e2e 자동 시연 테스트는 시작 화면이 사라질 때까지 기다리게 고침.
 - 2026-10-22: 전시용 A3 포스터 시안 3종(git 밖, 위치는 루트 handoff). `/design/garden?theme=&character=` 를 1180×820 @2x 로 찍어 태블릿 목업에 씀.
 - 2026-10-22: 사용자 결정으로 `dev`→`main` fast-forward(`151c177..ba609c7`) → 실제 사이트에 새 버튼·시작 화면 애니메이션 반영(배포된 CSS 에 `btn-solid` 확인, `/`·`/demo/auto` 200, `/design/*` 404 그대로).
-- 2026-10-23: 정원 캐릭터를 누르면 뜨던 네모 박스 제거(사용자 요청). SVG `<g role=button tabIndex=0>` 에 크롬이 그리던 포커스 테두리였음 → `.chick-tap`(garden.css) 으로 테두리·탭 하이라이트 없앰, 키보드 포커스일 때만 캐릭터 모양을 따라 빛남(drop-shadow). `characters.test.ts` 마크업 해시는 클래스 추가만 반영해 갱신(클래스 빼면 옛 해시 통과 확인).
+- 2026-10-23: 정원 캐릭터를 누르면 뜨던 네모 박스 제거(사용자 요청). SVG `<g role=button tabIndex=0>` 에 크롬이 그리던 포커스 테두리였음 → `.chick-tap`(garden.css) 으로 테두리·탭 하이라이트 없앰, 키보드 포커스일 때만 캐릭터 모양을 따라 빛남(drop-shadow). `characters.test.ts` 마크업 해시는 클래스 추가만 반영해 갱신(클래스 빼면 옛 해시 통과 확인). 사용자 요청으로 main 에도 합쳐 실제 사이트 반영(배포 CSS 에 `chick-tap` 확인).
