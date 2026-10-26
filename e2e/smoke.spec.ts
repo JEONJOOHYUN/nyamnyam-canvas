@@ -24,9 +24,48 @@ test("demo mode starts without an account and never calls Supabase", async ({
     .click();
   await expect(page.getByText("시연 모드")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "시뮬레이터 닫기" }),
+    page.getByRole("button", { name: "시연 도구 닫기" }),
   ).toBeVisible();
   expect(supabaseCalls).toEqual([]);
+});
+
+test("demo panel runs a meal step by step at 3x", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.addInitScript(() => {
+    // @ts-expect-error -- removing the API on purpose (no TTS)
+    delete window.speechSynthesis;
+  });
+  await page.goto("/demo");
+  await page.getByRole("button", { name: "냠냠이" }).last().click();
+  await page
+    .getByRole("button", { name: /바람 우체국/ })
+    .first()
+    .click();
+  await page.getByRole("button", { name: "3.0" }).click();
+  await expect(page.getByText("3.00x")).toBeVisible();
+
+  const serve = page.getByRole("button", { name: /음식 두기/ });
+  await expect(serve).toBeDisabled(); // no tray yet
+  await page.getByRole("button", { name: "식판 두기" }).click();
+  await expect(serve).toBeEnabled({ timeout: 10_000 });
+  await serve.click();
+  const eat = page.getByRole("button", { name: "음식 먹기" });
+  await expect(eat).toBeEnabled({ timeout: 10_000 });
+
+  await page.getByRole("spinbutton", { name: "먹을 양 (g)" }).fill("100");
+  await eat.click();
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "50",
+    { timeout: 20_000 },
+  );
+
+  await page.getByRole("button", { name: "처음부터" }).click();
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "0",
+  );
+  await expect(page.getByText("식판을 올려 주세요")).toBeVisible();
 });
 
 test("auto demo starts with one tap and hides the controls", async ({

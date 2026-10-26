@@ -89,6 +89,54 @@ describe("SimulatorSource → meal state machine", () => {
     sim.disconnect();
   });
 
+  it("demo steps: tray, food, eat in bites, all faster at 3x", async () => {
+    const sim = new SimulatorSource();
+    sim.setTray(false);
+    sim.setSpeed(3);
+    let meal = initialMealState;
+    sim.subscribe((r) => {
+      meal = mealReducer(
+        meal,
+        { type: "reading", reading: r },
+        defaultMealConfig,
+      );
+    });
+    await sim.connect();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(meal.trayG).toBeNull(); // nothing on the scale yet
+
+    sim.setTray(true);
+    await vi.advanceTimersByTimeAsync(2000); // ~6s of simulator time
+    near(meal.trayG, 350);
+
+    sim.setFood(200);
+    await vi.advanceTimersByTimeAsync(2100);
+    expect(meal.phase).toBe("SERVED");
+
+    // 100g in 10g bites every 2.2s of simulator time: never held back as dumping.
+    sim.eat(100);
+    expect(sim.eatingLeftG).toBe(100);
+    await vi.advanceTimersByTimeAsync(9000);
+    expect(sim.eatingLeftG).toBe(0);
+    expect(sim.foodG).toBe(100);
+    expect(meal.heldG).toBe(0);
+    near(meal.progress, 0.5, 0.02);
+    sim.disconnect();
+  });
+
+  it("clamps the speed and never eats more than is on the plate", () => {
+    const sim = new SimulatorSource();
+    sim.setSpeed(10);
+    expect(sim.speed).toBe(3);
+    sim.setSpeed(0.1);
+    expect(sim.speed).toBe(0.5);
+    sim.setFood(40);
+    sim.eat(100);
+    expect(sim.eatingLeftG).toBe(40);
+    sim.stopEating();
+    expect(sim.eatingLeftG).toBe(0);
+  });
+
   it("tare zeroes the current load", async () => {
     const sim = new SimulatorSource();
     let last: WeightReading | undefined;

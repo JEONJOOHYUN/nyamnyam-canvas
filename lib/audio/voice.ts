@@ -4,10 +4,16 @@ import { voices } from "@/content/voices";
 import { getAudioContext } from "./sfx";
 
 let voiceVolume = 1;
+let voiceRate = 1;
 let stopCurrent: (() => void) | null = null;
 
 export function setVoiceVolume(v: number) {
   voiceVolume = Math.min(1, Math.max(0, v));
+}
+
+// Demo playback speed: lines play faster (pitch kept) so they keep up with a sped-up meal.
+export function setVoiceRate(r: number) {
+  voiceRate = Math.min(3, Math.max(0.5, r));
 }
 
 export function stopSpeaking() {
@@ -54,6 +60,8 @@ export function speak(
     if (voiceVolume === 0) return finish(true);
 
     audio.volume = voiceVolume;
+    audio.playbackRate = voiceRate;
+    audio.preservesPitch = true;
     audio.onended = () => finish(true);
     audio
       .play()
@@ -84,7 +92,7 @@ export function speak(
           speechSynthesis.getVoices().find((v) => v.lang.startsWith("ko")) ??
           null;
         u.pitch = voices[character].tts.pitch;
-        u.rate = voices[character].tts.rate;
+        u.rate = voices[character].tts.rate * voiceRate;
         u.volume = voiceVolume;
         // TTS gives no audio stream to analyse, so flap the beak while it talks.
         u.onstart = () =>

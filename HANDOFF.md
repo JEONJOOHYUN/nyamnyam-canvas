@@ -1,6 +1,6 @@
 # HANDOFF — 냠냠캔버스 (nyamnyam-canvas)
 
-## 마지막 업데이트: 2026-10-23
+## 마지막 업데이트: 2026-10-26
 
 ## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1`
 
@@ -14,6 +14,8 @@
 - Codex 리뷰: 자동 시연 1회 지적 1건 반영(재방문 초기화). 반영이 작아 다시 리뷰는 생략(규칙상 허용, 사용자에게 알림).
 - **2026-10-20 부품 도착(실기기 작업은 2026-10-21부터)**: 개발 환경 설치 + 펌웨어 첫 컴파일 성공(코드 변경 없음, 설치 목록 `docs/FIRMWARE_NOTES.md` §7-3). 다음: §7 의 기기 등록 → `secrets.h` → 업로드 → 시리얼 → 보정 → 웹 연결. 주황 버튼 색은 유지로 결정됨.
 - **2026-10-23 실기기 첫 업로드 성공**: COM4(CP2102N), Wi-Fi 칸을 비운 `secrets.h` 로 업로드 → 첫 부팅 영점(offset 170635), 빈 상태 ±0.3g, 로드셀 끝을 누르면 −3~−10g(기본 factor 420, 보정 전이라 부호 반대 — 보정이 부호까지 계산하므로 배선 그대로). 다음: 사용자가 저울 등록 → `secrets.h` 에 세 줄 + 2.4GHz Wi-Fi → 다시 업로드 → 로드셀 고정 → 부모 화면 보정 → 웹 연결(§7-5·6).
+
+- **2026-10-26 시연 도구·배속·칭찬 타이밍**(사용자 요청: 시연 패널이 "난잡", 배속 필요, "멘트가 나오는 동시에 나와 어색"): `/demo` 패널을 `components/play/DemoPanel.tsx` 로 바꿈 — 식판 두기 / 음식 두기(200g) / 음식 먹기(g 입력, 10g씩 2.2초마다) / 처음부터 + 재생 속도(0.5~3x, −·+·1.0/1.25/1.5/2.0/3.0, 유튜브식 어두운 패널). 데모는 빈 저울에서 시작(식판도 손으로 올림). 배속은 `SimulatorSource` 자체 시계(`speed`, 샘플 간격 ÷ speed, 읽기 ts·누름·먹기 모두 이 시계) → 식사 상태 머신(3초 유지 등)은 그대로, 음성도 `setVoiceRate`(playbackRate, 음높이 유지; 퐁당이 1.3배는 mp3 에 들어 있어 겹치지 않음). 개발용 `/play` 패널(`SimulatorPanel`)·자동 시연은 그대로. 단계 칭찬은 효과음·조각 등장(550ms) 뒤 700ms, 마지막은 팡파레 뒤 1200ms 에 말하고, 그 사이 다른 대사(배불러요·탭)가 나오면 건너뜀. 시계는 `connect()` 때 `Date.now()` 로 시작(생성자에서 읽으면 cacheComponents 프리렌더 오류). `/demo` 를 떠나면 식사도 초기화(Codex 지적 2건 반영, 다시 리뷰 승인). e2e 30개(데모 3배속 단계 진행 추가)·단위 154개 통과.
 
 ## 현재 상태 (2026-10-17)
 
@@ -150,7 +152,7 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 | 경로                                         | 설명                                                                                                                                                                                                                                                                           |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `app/`                                       | `layout.tsx`(글꼴), `page.tsx`(홈 → 식사 시작), `play/`(아이 화면), `parent/`(부모 화면, Paperlogy·`parent.css`), `design/garden/`(시안 페이지, 개발·Preview 전용), `fonts/`                                                                                                   |
-| `components/play/`                           | `PlayScreen`(본체: 소스 연결·상태 머신·대사·저장), `StartScreen`(+`start.css`, 캐릭터 → 테마 선택), `Celebration`(컨페티·도장), `SimulatorPanel`                                                                                                                               |
+| `components/play/`                           | `PlayScreen`(본체: 소스 연결·상태 머신·대사·저장), `StartScreen`(+`start.css`, 캐릭터 → 테마 선택), `Celebration`(컨페티·도장), `SimulatorPanel`(개발용), `DemoPanel`(`/demo` 시연 도구·배속)                                                                                                                               |
 | `components/garden/`                         | `GardenScene`, 테마(`themes.tsx`, `PostBackground`·`WorldPieces`, `SeaTheme`, `SpaceTheme`), 성장 사건 `growth.ts`, 캐릭터(`characters.ts`, `Chick`=냠냠이, `Pongdang`, `Banjjak`), `garden.css`                                                                               |
 | `components/parent/`                         | `ParentApp`(로그인·PIN), `Dashboard`(아이 칩·탭), `SettingsForm`, `History`, `DeviceTab`(저울), `ui.tsx`(공통 조각)                                                                                                                                                            |
 | `components/ui/`                             | shadcn 컴포넌트 (부모 화면용)                                                                                                                                                                                                                                                  |
@@ -181,3 +183,4 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - 2026-10-23: Next.js 16.4.2 보안 업그레이드. 대사 타이밍 점검(자동·손 시연 재생 순서 기록) → 빈 식판 안내·두 번째 친구 인사·쉬는 중 말풍선·무반응 시간 고침, 단계 칭찬을 그림 등장 순간에 맞춤(세 세계 조각 재배치, `sceneFor`). Codex 리뷰 지적 1건 반영.
 - 2026-10-23: 정원 캐릭터를 누르면 뜨던 네모 박스 제거(사용자 요청). SVG `<g role=button tabIndex=0>` 에 크롬이 그리던 포커스 테두리였음 → `.chick-tap`(garden.css) 으로 테두리·탭 하이라이트 없앰, 키보드 포커스일 때만 캐릭터 모양을 따라 빛남(drop-shadow). `characters.test.ts` 마크업 해시는 클래스 추가만 반영해 갱신(클래스 빼면 옛 해시 통과 확인). 사용자 요청으로 main 에도 합쳐 실제 사이트 반영(배포 CSS 에 `chick-tap` 확인).
 - 2026-10-23: 실기기 첫 연결. 처음 두 케이블은 충전 전용(LED·휴대폰 충전은 되는데 장치 관리자에 아무것도 안 뜸) → 로지텍 마우스 케이블로 인식, CP210x 드라이버는 사용자가 설치. 보드 회로도(하이제니스 GitHub) 확인 내용은 FIRMWARE_NOTES §1. 업로드·시리얼·누름 반응 확인.
+- 2026-10-26: 시연 도구(DemoPanel)·배속·단계 칭찬 지연. 저울 외형 ver2 실측 반영(아티팩트, 루트 handoff).

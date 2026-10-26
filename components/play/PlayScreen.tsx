@@ -18,7 +18,7 @@ import { pickLine, type LineKey } from "@/content/lines";
 import { sfx, unlockAudio } from "@/lib/audio/sfx";
 import { speak, stopSpeaking } from "@/lib/audio/voice";
 import { setSfxVolume } from "@/lib/audio/sfx";
-import { setVoiceVolume } from "@/lib/audio/voice";
+import { setVoiceRate, setVoiceVolume } from "@/lib/audio/voice";
 import {
   initialMealState,
   mealReducer,
@@ -64,6 +64,7 @@ import type { WeightReading, WeightSource } from "@/lib/weight/types";
 import { Confetti, Stamp } from "./Celebration";
 import { AUTO_ROUNDS, useAutoMeal } from "./autoDemo";
 import { AutoDemoStart } from "./AutoDemoStart";
+import { DemoPanel } from "./DemoPanel";
 import { SimulatorPanel } from "./SimulatorPanel";
 import { StartScreen } from "./StartScreen";
 
@@ -103,6 +104,10 @@ const baselineStage = ({ settings, carry }: Config) =>
 
 // The start overlay stays this long after the meal starts so it can fade out (.start-leave).
 const START_LEAVE_MS = 240;
+// A stage cheer waits for the chime and the new piece settling (550ms), so the voice never
+// talks over them; the last one waits for the fanfare's main chord.
+const CHEER_DELAY_MS = 700;
+const FINALE_CHEER_DELAY_MS = 1200;
 
 // True for a moment after `started` turns on. Set while rendering (not in an effect) so the
 // overlay never disappears for a frame before it fades.
@@ -391,18 +396,31 @@ export function PlayScreen({
     if (stage <= prev) return;
     sfx.stageUp();
     setTimeout(sfx.sparkle, 300);
-    const cheer = say(`stage${stage}` as LineKey);
-    if (stage < STAGE_COUNT) return;
-    setTimeout(sfx.complete, 600);
+    const last = stage === STAGE_COUNT;
+    if (last) setTimeout(sfx.complete, 600);
     let live = true;
-    // Only follow up when the cheer finished on its own (not cut off by a tap or unmount).
-    void cheer.then((finished) => {
-      if (live && finished) void say("complete");
-    });
-    const t = setTimeout(() => setCelebrationOver(true), 3800);
+    // A quicker next stage replaces a cheer that hasn't started yet, and any line said in
+    // the meantime (배불러요, a tap) wins over it.
+    const at = turn.current;
+    const talk = setTimeout(
+      () => {
+        if (turn.current !== at) return;
+        const cheer = say(`stage${stage}` as LineKey);
+        // Only follow up when the cheer finished on its own (not cut off by a tap or unmount).
+        if (last)
+          void cheer.then((finished) => {
+            if (live && finished) void say("complete");
+          });
+      },
+      last ? FINALE_CHEER_DELAY_MS : CHEER_DELAY_MS,
+    );
+    const over = last
+      ? setTimeout(() => setCelebrationOver(true), 3800)
+      : undefined;
     return () => {
       live = false;
-      clearTimeout(t);
+      clearTimeout(talk);
+      clearTimeout(over);
     };
   }, [stage, say]);
 
@@ -573,6 +591,44 @@ export function PlayScreen({
     dispatch({ type: "reset" });
   };
 
+  // Hand-driven demo (/demo): it starts on an empty scale (the presenter places the tray,
+  // then the food) and has a playback speed for the simulator's clock and the voices.
+  const manualDemo = demo && !auto;
+  const demoSim =
+    manualDemo && source instanceof SimulatorSource ? source : null;
+  const [speed, setSpeed] = useState(1);
+  useEffect(() => {
+    if (!demoSim) return;
+    demoSim.setSpeed(speed);
+    setVoiceRate(speed);
+    return () => setVoiceRate(1);
+  }, [demoSim, speed]);
+  useEffect(() => {
+    if (!demoSim || !started) return;
+    demoSim.stopEating();
+    demoSim.setFood(0);
+    demoSim.setTray(false);
+    // Leaving keeps the page state (cacheComponents) and this runs again on the way back:
+    // the meal starts over too, so it never disagrees with the emptied scale.
+    return () => {
+      prevStage.current = 0;
+      pendingCarry.current = null;
+      setStamped(false);
+      setCelebrationOver(false);
+      dispatch({ type: "reset" });
+    };
+  }, [demoSim, started]);
+  // A new meal clears the plate; "처음부터" also takes the tray off.
+  const newMeal = () => {
+    demoSim?.stopEating();
+    demoSim?.setFood(0);
+    reset();
+  };
+  const demoRestart = () => {
+    demoSim?.setTray(false);
+    newMeal();
+  };
+
   // Auto demo: the next friend and world once a meal and its celebration are over.
   const [round, setRound] = useState(0);
   useAutoMeal(
@@ -686,7 +742,7 @@ export function PlayScreen({
             {meal.phase === "ENDED" && !auto && (
               <button
                 type="button"
-                onClick={reset}
+                onClick={newMeal}
                 className="tap-pop btn-solid min-h-14 min-w-36 rounded-full border-2 border-white/90 px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] [--btn:#3f9b3c]"
               >
                 {pictureDone || settings.mode === "amount"
@@ -761,8 +817,17 @@ export function PlayScreen({
           />
         )}
 
-        {(SHOW_SIMULATOR || demo) &&
-          !auto &&
+        {started && demoSim && (
+          <DemoPanel
+            sim={demoSim}
+            meal={meal}
+            speed={speed}
+            onSpeed={setSpeed}
+            onReset={demoRestart}
+          />
+        )}
+        {SHOW_SIMULATOR &&
+          !demo &&
           started &&
           source instanceof SimulatorSource && (
             <SimulatorPanel

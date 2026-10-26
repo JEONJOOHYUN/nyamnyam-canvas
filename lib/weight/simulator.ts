@@ -15,16 +15,30 @@ import type {
 const TRAY_G = 350;
 const PRESS_G = 120; // spoon pressing down on the tray
 const NOISE_G = 2;
+const SAMPLE_MS = 1000 / SAMPLE_HZ;
+export const MIN_SPEED = 0.5;
+export const MAX_SPEED = 3;
+// Eating in small bites: far below half the serving, so never mistaken for dumping.
+export const EAT_BITE_G = 10;
+export const EAT_EVERY_MS = 2200;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-// Fake load cell: same sampling, filter and send rules as the firmware.
+// Fake load cell: same sampling, filter and send rules as the firmware. It keeps its own
+// clock (reading timestamps, holds, bites), which runs `speed` times faster for the demo,
+// so the meal machine's waits shrink without the machine changing at all.
 export class SimulatorSource implements WeightSource {
   status: WeightSourceStatus = "idle";
   noise = false;
   foodG = 0;
   lifted = false;
+  // The empty tray sits on the scale unless the demo takes it off to place it by hand.
+  trayOn = true;
+  speed = 1;
+  // Set on the first connect (reading the time while rendering would freeze it in a prerender).
+  private clock = 0;
   private pressUntil = 0;
+  private eating: { leftG: number; nextAt: number } | null = null;
   private tareOffset = 0;
   private seq = 0;
   private filter = initialFilterState;
@@ -37,14 +51,23 @@ export class SimulatorSource implements WeightSource {
 
   async connect() {
     if (this.timer) return;
+    this.clock ||= Date.now();
     this.setStatus("online");
-    this.timer = setInterval(() => this.sample(), 1000 / SAMPLE_HZ);
+    this.startTimer();
   }
 
   disconnect() {
+    this.stopTimer();
+    this.setStatus("idle");
+  }
+
+  private startTimer() {
+    this.timer = setInterval(() => this.sample(), SAMPLE_MS / this.speed);
+  }
+
+  private stopTimer() {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
-    this.setStatus("idle");
   }
 
   onStatus(cb: () => void) {
@@ -68,7 +91,7 @@ export class SimulatorSource implements WeightSource {
 
   async sendCommand(cmd: DeviceCommand) {
     // calibrate/reboot have nothing to do on a perfect fake sensor.
-    if (cmd.type === "tare") this.tareOffset = this.load(Date.now());
+    if (cmd.type === "tare") this.tareOffset = this.load(this.clock);
   }
 
   setFood(g: number) {
@@ -83,21 +106,62 @@ export class SimulatorSource implements WeightSource {
     this.lifted = v;
   }
 
+  setTray(on: boolean) {
+    this.trayOn = on;
+  }
+
   setNoise(v: boolean) {
     this.noise = v;
   }
 
+  setSpeed(v: number) {
+    const next = Math.min(MAX_SPEED, Math.max(MIN_SPEED, v));
+    if (next === this.speed) return;
+    this.speed = next;
+    if (this.timer) {
+      this.stopTimer();
+      this.startTimer();
+    }
+  }
+
   press(ms = 600) {
-    this.pressUntil = Date.now() + ms;
+    this.pressUntil = this.clock + ms;
+  }
+
+  // Eats `g` grams in bites of EAT_BITE_G every EAT_EVERY_MS (simulator time), first bite now.
+  eat(g: number) {
+    const leftG = Math.min(g, this.foodG);
+    this.eating = leftG > 0 ? { leftG, nextAt: this.clock } : null;
+  }
+
+  stopEating() {
+    this.eating = null;
+  }
+
+  get eatingLeftG() {
+    return this.eating?.leftG ?? 0;
   }
 
   private load(now: number) {
     if (this.lifted) return 0;
-    return TRAY_G + this.foodG + (now < this.pressUntil ? PRESS_G : 0);
+    return (
+      (this.trayOn ? TRAY_G : 0) +
+      this.foodG +
+      (now < this.pressUntil ? PRESS_G : 0)
+    );
   }
 
   private sample() {
-    const now = Date.now();
+    this.clock += SAMPLE_MS;
+    const now = this.clock;
+    const e = this.eating;
+    if (e && now >= e.nextAt) {
+      const g = Math.min(EAT_BITE_G, e.leftG, this.foodG);
+      this.bite(g);
+      e.leftG -= g;
+      e.nextAt += EAT_EVERY_MS;
+      if (e.leftG <= 0 || this.foodG <= 0) this.eating = null;
+    }
     const noise = this.noise ? (this.random() * 2 - 1) * NOISE_G : 0;
     const raw = this.load(now) - this.tareOffset + noise;
     const f = filterStep(this.filter, raw, now);
