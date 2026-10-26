@@ -62,7 +62,12 @@ import {
 import { SimulatorSource } from "@/lib/weight/simulator";
 import type { WeightReading, WeightSource } from "@/lib/weight/types";
 import { Confetti, Stamp } from "./Celebration";
-import { AUTO_ROUNDS, useAutoMeal } from "./autoDemo";
+import {
+  AUTO_ROUNDS,
+  setAutoSpeed,
+  useAutoMeal,
+  useAutoSpeed,
+} from "./autoDemo";
 import { AutoDemoStart } from "./AutoDemoStart";
 import { DemoPanel } from "./DemoPanel";
 import { SimulatorPanel } from "./SimulatorPanel";
@@ -597,12 +602,16 @@ export function PlayScreen({
   const demoSim =
     manualDemo && source instanceof SimulatorSource ? source : null;
   const [speed, setSpeed] = useState(1);
+  // The auto demo's speed is picked on its start tap and remembered on this device.
+  const autoSpeed = useAutoSpeed();
+  const playSpeed = manualDemo ? speed : auto ? autoSpeed : 1;
+  const speedSim = demo && source instanceof SimulatorSource ? source : null;
   useEffect(() => {
-    if (!demoSim) return;
-    demoSim.setSpeed(speed);
-    setVoiceRate(speed);
+    if (!speedSim) return;
+    speedSim.setSpeed(playSpeed);
+    setVoiceRate(playSpeed);
     return () => setVoiceRate(1);
-  }, [demoSim, speed]);
+  }, [speedSim, playSpeed]);
   useEffect(() => {
     if (!demoSim || !started) return;
     demoSim.stopEating();
@@ -634,6 +643,7 @@ export function PlayScreen({
   useAutoMeal(
     auto && started && source instanceof SimulatorSource ? source : null,
     round,
+    autoSpeed,
     () => {
       reset();
       const next = AUTO_ROUNDS[(round + 1) % AUTO_ROUNDS.length];
@@ -770,6 +780,8 @@ export function PlayScreen({
         {(!started || leavingStart) && auto && (
           <AutoDemoStart
             leaving={started}
+            speed={autoSpeed}
+            onSpeed={setAutoSpeed}
             onStart={() => {
               if (canFullscreen) enterFullscreen();
               const first = AUTO_ROUNDS[0];

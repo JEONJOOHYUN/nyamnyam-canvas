@@ -76,6 +76,13 @@ test("auto demo starts with one tap and hides the controls", async ({
     if (r.url().includes(".supabase.co")) supabaseCalls.push(r.url());
   });
   await page.goto("/demo/auto");
+  // The speed is picked on the start tap only, and remembered on this device.
+  await page.getByRole("button", { name: "2.0x" }).click();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "2.0x" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await page.getByRole("button", { name: "시작하기" }).click();
   // The start overlay (it also says "자동 시연") fades out for a moment before it goes.
   await expect(page.locator(".start-screen")).toHaveCount(0);
