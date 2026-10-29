@@ -36,7 +36,7 @@ HX711 VCC → ESP32 **3V3**, GND → GND, DT → **GPIO16**, SCK → **GPIO4**. 
 
 ## 문서
 
-- [HANDOFF.md](HANDOFF.md) — 현재 상태와 다음 할 일
+- [.agents/handoff.md](.agents/handoff.md) — 현재 상태와 다음 할 일 (설계 결정 `decisions.md`, 파일 구조 `structure.md`, 지난 기록 `history.md` 도 같은 폴더)
 - [docs/SPEC.md](docs/SPEC.md) — 전체 요구사항
 - [docs/ASSETS.md](docs/ASSETS.md) — 소리·음성·이미지 출처
 
