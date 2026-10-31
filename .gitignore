@@ -52,3 +52,6 @@ firmware/**/secrets.h
 
 # raw voice downloads from Clova Dubbing (split files live in public/voices)
 /voices-src/
+
+# Claude Code local settings (HyperFrames plugin is installed with --scope local)
+/.claude/settings.local.json
