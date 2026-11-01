@@ -31,6 +31,7 @@ import {
   mealCompleted,
   nextCarry,
   pictureProgress,
+  shownPercent,
   stageProgress,
   type PictureCarry,
 } from "@/lib/meal/picture";
@@ -347,7 +348,7 @@ export function PlayScreen({
       : pointing
         ? "point"
         : "hello";
-  const pct = Math.round(picture * 100);
+  const pct = shownPercent(picture, stage === STAGE_COUNT);
 
   const say = useCallback(
     (key: LineKey) => {

@@ -68,6 +68,15 @@ export function stageProgress(
   return picture >= 1 ? 1 : (picture * lastThresholdPct) / 100;
 }
 
+// The number on the child screen. While eating it follows the progress (in mode A that is the
+// share of the served food, spec §4-2), but a finished picture always reads 100%: mode A finishes
+// at the last stage threshold (95% by default), which would otherwise leave "95%" on the done
+// picture. Never 100% before the picture is done (rounding 99.6% up would read as finished).
+export function shownPercent(picture: number, pictureDone: boolean): number {
+  if (pictureDone) return 100;
+  return Math.min(99, Math.round(picture * 100));
+}
+
 // Whether a finished meal counts as "done" for the record and for mode B.
 export function mealCompleted(
   rule: CompletionRule,

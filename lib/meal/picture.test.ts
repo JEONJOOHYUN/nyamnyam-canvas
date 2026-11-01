@@ -5,6 +5,7 @@ import {
   mealCompleted,
   nextCarry,
   pictureProgress,
+  shownPercent,
   stageProgress,
   type CompletionRule,
 } from "./picture";
@@ -133,5 +134,18 @@ describe("completion", () => {
       eatenG: 120,
       mealIds: ["m1"],
     });
+  });
+});
+
+describe("the number on the child screen", () => {
+  it("reads 100% once the picture is done, even when mode A finishes at 95%", () => {
+    expect(shownPercent(0.95, true)).toBe(100);
+    expect(shownPercent(0.95, false)).toBe(95);
+  });
+
+  it("never reads 100% before the picture is done", () => {
+    expect(shownPercent(0.996, false)).toBe(99);
+    expect(shownPercent(1, false)).toBe(99);
+    expect(shownPercent(0.424, false)).toBe(42);
   });
 });

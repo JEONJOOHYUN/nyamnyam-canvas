@@ -1,6 +1,6 @@
 # HANDOFF — 냠냠캔버스 (nyamnyam-canvas)
 
-## 마지막 업데이트: 2026-10-29
+## 마지막 업데이트: 2026-11-01
 
 ## 저장소: https://github.com/JEONJOOHYUN/nyamnyam-canvas · 브랜치: dev · 마지막 커밋: `git log -1`
 
@@ -116,3 +116,4 @@ npm run voices       # ElevenLabs 음성 다시 만들기(바뀐 줄만, --dry /
 - 2026-10-26: 시연 도구(DemoPanel)·배속·단계 칭찬 지연. 저울 외형 ver2 실측 반영(아티팩트, 루트 handoff).
 - 2026-10-27: 실기기 첫 웹 연결·영점·보정 명령 확인, 멈춤 접촉 오차로 테이프 제거, 윗판·받침 분리 → 2026-10-28 볼트 고정으로 결정(위 "지금 상태").
 - 2026-10-29: 문서 위치 통일(`C:devCLAUDE.md` §2) — `HANDOFF.md`→`.agents/handoff.md`, `docs/HISTORY.md`→`.agents/history.md`, 설계 결정·파일 구조 지도는 `.agents/decisions.md`·`.agents/structure.md` 로 분리.
+- 2026-11-01: 완성된 그림의 숫자를 100%로(`shownPercent`, 먹는 동안은 먹은 양 % 그대로). 단위 156·e2e 30 통과, Codex 리뷰 지적 없음. 사용자 요청으로 main 에도 합침. (소개 영상 작업은 git 밖 `C:/dev/_work/nyamnyam/video/`, 루트 handoff 참고.)
