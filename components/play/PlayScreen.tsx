@@ -437,6 +437,7 @@ export function PlayScreen({
 
   // Record the finished meal once, and queue what it adds to the next meal's picture.
   const pictureDone = stage === STAGE_COUNT;
+  const startsNewPicture = pictureDone || settings.mode === "amount";
   const ended = meal.phase === "ENDED";
   useEffect(() => {
     if (!ended || saved.current) return;
@@ -638,6 +639,17 @@ export function PlayScreen({
     demoSim?.setTray(false);
     newMeal();
   };
+  // A finished picture (or mode A, where every meal is its own picture) goes back to
+  // choosing a friend and a world; "다음 식사" keeps both to go on with the same picture.
+  const newPicture = () => {
+    newMeal();
+    stopSpeaking();
+    pick.current++;
+    setGreeted(false);
+    setBubble(null);
+    setCharacter(null);
+    setTheme(null);
+  };
 
   // Auto demo: the next friend and world once a meal and its celebration are over.
   const [round, setRound] = useState(0);
@@ -753,12 +765,10 @@ export function PlayScreen({
             {meal.phase === "ENDED" && !auto && (
               <button
                 type="button"
-                onClick={newMeal}
+                onClick={startsNewPicture ? newPicture : newMeal}
                 className="tap-pop btn-solid min-h-14 min-w-36 rounded-full border-2 border-white/90 px-6 text-[clamp(1.2rem,3.6vmin,1.6rem)] [--btn:#3f9b3c]"
               >
-                {pictureDone || settings.mode === "amount"
-                  ? "새 그림 시작"
-                  : "다음 식사"}
+                {startsNewPicture ? "새 그림 시작" : "다음 식사"}
               </button>
             )}
           </div>

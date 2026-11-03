@@ -76,3 +76,27 @@ test("play screen fits the device at stage 5", async ({ page }) => {
     maxDiffPixelRatio: 0.02,
   });
 });
+
+test("new picture goes back to choosing a friend", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.addInitScript(() => {
+    // @ts-expect-error -- removing the API on purpose
+    delete window.speechSynthesis;
+  });
+  await page.goto("/play");
+  await page.getByRole("button", { name: "냠냠이" }).click();
+  await page.getByRole("button", { name: "바람 우체국" }).click();
+
+  const debug = page.locator("p.font-mono");
+  await expect(debug).toContainText("식판 350g", { timeout: 15_000 });
+  await setFood(page, 200);
+  await expect(debug).toContainText("SERVED", { timeout: 15_000 });
+  // The open simulator covers the top-right buttons on small phones.
+  await page.getByRole("button", { name: "시뮬레이터 닫기" }).click();
+  await page.getByRole("button", { name: "배불러요" }).click();
+  await page.getByRole("button", { name: "새 그림 시작" }).click();
+
+  await expect(page.getByText("누구랑 먹을까?")).toBeVisible();
+  await page.getByRole("button", { name: "퐁당이" }).click();
+  await expect(page.getByRole("button", { name: "바다 왕국" })).toBeVisible();
+});
